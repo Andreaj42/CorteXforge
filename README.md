@@ -6,8 +6,8 @@ It relies on the [GNU Radio](https://www.gnuradio.org) environment to record lab
 This project is organized into two main components:
 - Scenario generation: this part produces configuration files describing the experiment setup. It creates: 
   - a `scenario.yaml` file defining which nodes will be used on CorteXlab;
-  - an `experiments.csv` file orchestrating the role and sequence of these nodes.
-- Experiment execution: this part deploys and executes the generates experiment definitions (`experiments.csv`) directly on the [Slices/CorteXlab](https://www.cortexlab.fr/doku.php?id=start) nodes.
+  - an `timeline.csv` file orchestrating the role and sequence of these nodes.
+- Experiment execution: this part deploys and executes the generates experiment definitions (`timeline.csv`) directly on the [Slices/CorteXlab](https://www.cortexlab.fr/doku.php?id=start) nodes.
 
 ## Usage
 
@@ -50,6 +50,29 @@ And move the previously generated ```scenario``` folder into the `forge` directo
 To monitor your experiment, use: 
 - ```minus testbed status```
 
+
+```scenario.yaml``` .example
+```yaml
+description: Dataset Generator
+
+duration: 300
+
+nodes:
+  node6:
+    container:
+    - image: ghcr.io/andreaj42/cortexforge:latest        
+      command: bash -lc "python3 /cortexlab/homes/andrea_joly/CorteXForge/src/forge/main.py rx"
+      
+  node10:
+    container:
+     - image: ghcr.io/andreaj42/cortexforge:latest
+       command: bash -lc "python3 /cortexlab/homes/andrea_joly/CorteXForge/src/forge/main.py tx --timeline /cortexlab/homes/andrea_joly/timeline.csv"
+
+  node31:
+    container:
+     - image: ghcr.io/andreaj42/cortexforge:latest
+       command: bash -lc "python3 /cortexlab/homes/andrea_joly/CorteXForge/src/forge/main.py tx --timeline /cortexlab/homes/andrea_joly/timeline.csv"
+```
 
 ### Docker Images
 To simplify deployment and ensure reproductibility, we generated a Docker image.

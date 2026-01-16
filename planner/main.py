@@ -36,7 +36,7 @@ def main():
     )
 
     experiment = ExperimentScenario(nodes=nodes, duration=args.duration)
-    experiment.to_csv("scenarios/experiments.csv")
+    experiment.to_csv("scenarios/timeline.csv")
 
     logger.info("Scenario generation completed.")
 
