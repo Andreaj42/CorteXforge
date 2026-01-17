@@ -13,10 +13,7 @@ def main(args):
     node_name = get_node_name(logger)
     timeline_all = load_timeline(args.timeline)
 
-    timeline = [
-        ev for ev in timeline_all
-        if ev.get("radio") == node_name
-    ]
+    timeline = [ev for ev in timeline_all if ev.get("radio") == node_name]
 
     logger.info(f"[TX] Loaded {len(timeline_all)} events total, selected {len(timeline)} for node={node_name}")
 
