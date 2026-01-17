@@ -24,7 +24,7 @@ The scenario generator can be executed locally before  deployment in Slices/Cort
 - ```python3.13 venv .venv```
 - ```source .venv/bin/activate```
 - ```pip install -r requirements.txt```
-- ```python3.13 main.py --signal_duration 600```
+- ```python3.13 main.py --duration 600```
 
 ### 2. Forge
 :warning: This part must be executed directly on the Slices/CorteXlab testbed !
