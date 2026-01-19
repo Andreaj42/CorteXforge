@@ -1,5 +1,4 @@
 import time
-from dataclasses import dataclass
 from config import defaults
 from utils.logger import setup_logger
 from radio.tx_burst import tx_burst
