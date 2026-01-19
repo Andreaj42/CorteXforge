@@ -1,5 +1,4 @@
 import time
-from config import defaults
 from utils.logger import setup_logger
 from radio.tx_burst import tx_burst
 from radio.waveforms import make_burst
