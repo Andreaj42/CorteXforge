@@ -7,7 +7,7 @@ from cortexforge.utils.logger import setup_logger
 logger = setup_logger()
 
 
-def main():
+def main() -> None:
     logger.info("Starting scenario generation...")
     args = parse_args()
     nodes = load_nodes(args.nodes_path)
@@ -16,7 +16,7 @@ def main():
         nodes=nodes,
         duration=args.duration,
         image="ghcr.io/andreaj42/cortexforge:latest",
-        command='bash -lc "python3 /cortexlab/homes/andrea_joly/CorteXForge/src/cortexforge/forge/main.py"',
+        command='bash -lc "corterxforge-forge --args',
         description="Dataset Generator",
         output_path="configs/scenario.yaml",
     )
