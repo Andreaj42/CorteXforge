@@ -3,9 +3,23 @@ import argparse
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="CorteXForge planner", description="Dataset Generator"
+        prog="CorteXForge", description="Dataset Generator"
     )
-    parser.add_argument("--file", type=int, default=600, help="Timelive file path")
+    sub = parser.add_subparsers(
+        dest="role",
+        required=True,
+        help="Radio role for this node (rx=receiver, tx=transmitter)",
+    )
+
+    # RX
+    # rx_p = sub.add_parser("rx", help="Receiver mode")
+    sub.add_parser("rx", help="Receiver mode")
+
+    # TX
+    tx_p = sub.add_parser("tx", help="Transmitter")
+    tx_p.add_argument(
+        "--timeline", type=str, required=True, help="Path to timeline CSV"
+    )
     return parser
 
 

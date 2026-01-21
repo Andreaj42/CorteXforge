@@ -1,10 +1,10 @@
-from utils.parser import parse_args
+from cortexforge.cli.forge import parse_args
+from cortexforge.utils.logger import setup_logger
 
-from utils.logger import setup_logger
+logger = setup_logger()
 
 
 def main():
-    logger = setup_logger()
     args = parse_args()
     logger.info("Starting CorteXForge...")
     logger.info(f"Args={args}")
