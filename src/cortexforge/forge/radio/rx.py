@@ -6,12 +6,11 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from config import defaults
-from utils.sigmf_writer import write_sigmf
+from cortexforge.forge.config import defaults
+from cortexforge.forge.utils.sigmf_writer import write_sigmf
 
-from radio.rx_record import rx_record
-from utils.logger import setup_logger
-
+from cortexforge.forge.radio.rx_record import rx_record
+from cortexforge.forge.utils.logger import setup_logger
 
 def main(args):
     logger = setup_logger()

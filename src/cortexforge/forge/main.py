@@ -10,11 +10,11 @@ def main():
     logger.info(f"Args={args}")
 
     if args.role == "rx":
-        from radio.rx import main as rx_main
+        from cortexforge.forge.radio.rx import main as rx_main
 
         rx_main(args)
     elif args.role == "tx":
-        from radio.tx import main as tx_main
+        from cortexforge.forge.radio.tx import main as tx_main
 
         tx_main(args)
     else:

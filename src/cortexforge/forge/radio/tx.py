@@ -1,12 +1,12 @@
 import time
 
-from utils.load_timeline import load_timeline
-from utils.node_identity import get_node_name
+from cortexforge.forge.utils.load_timeline import load_timeline
+from cortexforge.forge.utils.node_identity import get_node_name
 
-from radio import defaults
-from radio.tx_burst import tx_burst
-from radio.waveforms import make_burst
-from utils.logger import setup_logger
+from cortexforge.forge.config import defaults
+from cortexforge.forge.radio.tx_burst import tx_burst
+from cortexforge.forge.radio.waveforms import make_burst
+from cortexforge.forge.utils.logger import setup_logger
 
 
 def main(args):
