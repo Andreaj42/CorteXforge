@@ -1,24 +1,22 @@
 import os
-import argparse
-from generators.cortex_scenario import generate_cortex_scenario
-from generators.experiment_scenario import ExperimentScenario
-from utils.loader import load_nodes
-from utils.logger import setup_logger
+
+from cortexforge.cli.planner import parse_args
+from cortexforge.planner.generators.cortex_scenario import generate_cortex_scenario
+from cortexforge.planner.generators.experiment_scenario import ExperimentScenario
+from cortexforge.planner.utils.loader import load_nodes
+from cortexforge.utils.logger import setup_logger
+
+logger = setup_logger()
 
 
 def main():
-    logger = setup_logger()
     logger.info("Starting scenario generation...")
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--duration", type=int, default=6000, help="Scenario duration in seconds"
-    )
-    args = parser.parse_args()
+    args = parse_args()
 
     os.makedirs("scenarios", exist_ok=True)
 
     try:
-        nodes = load_nodes("configs/nodes.yaml")
+        nodes = load_nodes(args.nodes_path)
         if len(nodes) <= 1:
             raise ValueError("At least two nodes is required.")
         logger.info(f"Loaded {len(nodes)} nodes: {nodes}")
@@ -30,7 +28,7 @@ def main():
         nodes=nodes,
         duration=args.duration,
         image="ghcr.io/andreaj42/cortexforge:latest",
-        command="bash -lc \"python3 /cortexlab/homes/andrea_joly/CorteXForge/forge/main.py\"",
+        command='bash -lc "python3 /cortexlab/homes/andrea_joly/CorteXForge/src/cortexforge/forge/main.py"',
         description="Dataset Generator",
         output_path="scenarios/scenario.yaml",
     )

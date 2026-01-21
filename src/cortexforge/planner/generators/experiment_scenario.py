@@ -1,12 +1,7 @@
-from typing import List
 import random
+from typing import List
 
 import pandas as pd
-
-
-from utils.logger import setup_logger
-
-logger = setup_logger()
 
 
 class ExperimentScenario:
@@ -59,7 +54,7 @@ class ExperimentScenario:
         max_signal_duration = self.duration - self.warmup_time
 
         rows = []
-        for i in range(0,10):
+        for i in range(0, 10):
             signal_node = rng.choice(self.tx_nodes)
             signal_duration = rng.uniform(1, max_signal_duration / 4)
             signal_start_time = rng.uniform(

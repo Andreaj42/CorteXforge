@@ -1,5 +1,6 @@
 import numpy as np
-from gnuradio import gr, blocks, uhd
+from gnuradio import blocks, gr, uhd
+
 
 class tx_burst(gr.top_block):
     def __init__(self, usrp_args, freq, rate, gain, antenna, iq):

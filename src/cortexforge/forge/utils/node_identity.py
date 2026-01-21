@@ -1,5 +1,6 @@
 import socket
 
+
 def get_node_name(logger=None) -> str:
     try:
         hostname = socket.gethostname()

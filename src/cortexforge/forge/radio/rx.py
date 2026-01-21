@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import time
 import signal
-from pathlib import Path
-from config import defaults
+import time
 from datetime import datetime, timezone
+from pathlib import Path
+
+from config import defaults
+from utils.sigmf_writer import write_sigmf
 
 from radio.rx_record import rx_record
 from utils.logger import setup_logger
-from utils.sigmf_writer import write_sigmf
 
 
 def main(args):
@@ -39,7 +40,10 @@ def main(args):
     )
 
     stop_flag = {"stop": False}
-    def handler(sig, frame): stop_flag["stop"] = True
+
+    def handler(sig, frame):
+        stop_flag["stop"] = True
+
     signal.signal(signal.SIGINT, handler)
     signal.signal(signal.SIGTERM, handler)
 

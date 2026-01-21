@@ -1,4 +1,5 @@
-from gnuradio import gr, blocks, uhd
+from gnuradio import blocks, gr, uhd
+
 
 class rx_record(gr.top_block):
     def __init__(self, usrp_args, freq, rate, gain, out_path, antenna):
@@ -18,4 +19,3 @@ class rx_record(gr.top_block):
         self.sink.set_unbuffered(False)
 
         self.connect(self.src, self.sink)
-

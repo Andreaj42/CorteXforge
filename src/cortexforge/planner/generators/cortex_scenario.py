@@ -1,9 +1,11 @@
-from yaml import safe_dump
+import logging
 from pathlib import Path
 from typing import List
-from utils.logger import setup_logger
 
-logger = setup_logger()
+from yaml import safe_dump
+
+logger = logging.getLogger(__name__)
+
 
 def generate_cortex_scenario(
     nodes: List[str],
@@ -13,11 +15,7 @@ def generate_cortex_scenario(
     description: str = "Dataset Generator",
     output_path: str = "scenario.yaml",
 ):
-    data = {
-        "description": description,
-        "duration": duration,
-        "nodes": {}
-    }
+    data = {"description": description, "duration": duration, "nodes": {}}
 
     for node in nodes:
         data["nodes"][node.replace("mnode", "node")] = {

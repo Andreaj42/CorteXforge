@@ -20,11 +20,10 @@ The scenario generator can be executed locally before  deployment in Slices/Cort
 
 ### Example usage
 - ```git clone https://github.com/Andreaj42/CorteXForge.git```
-- ```cd planner```
-- ```python3.13 venv .venv```
+- ```python3.13 -m venv .venv```
 - ```source .venv/bin/activate```
-- ```pip install -r requirements.txt```
-- ```python3.13 main.py --duration 600```
+- ```pip install -e .```
+- ```cortexforge-planner --nodes-path confis/nodes.yaml --duration 600```
 
 ### 2. Forge
 :warning: This part must be executed directly on the Slices/CorteXlab testbed !

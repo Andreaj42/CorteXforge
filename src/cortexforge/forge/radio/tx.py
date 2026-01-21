@@ -1,9 +1,12 @@
 import time
-from utils.logger import setup_logger
-from radio.tx_burst import tx_burst
-from radio.waveforms import make_burst
+
 from utils.load_timeline import load_timeline
 from utils.node_identity import get_node_name
+
+from radio import defaults
+from radio.tx_burst import tx_burst
+from radio.waveforms import make_burst
+from utils.logger import setup_logger
 
 
 def main(args):
@@ -13,7 +16,9 @@ def main(args):
 
     timeline = [ev for ev in timeline_all if ev.get("radio") == node_name]
 
-    logger.info(f"[TX] Loaded {len(timeline_all)} events total, selected {len(timeline)} for node={node_name}")
+    logger.info(
+        f"[TX] Loaded {len(timeline_all)} events total, selected {len(timeline)} for node={node_name}"
+    )
 
     logger.info(f"[TX] Loaded {len(timeline)} events from {args.timeline}")
     logger.info(f"[TX] default antenna={defaults.DEFAULT_TX_ANT}")

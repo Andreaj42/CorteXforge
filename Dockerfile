@@ -1,5 +1,5 @@
 FROM ghcr.io/cortexlab/cxlb-gnuradio-3.10:1.5
 
-COPY requirements.txt .
+COPY requirements-cortexlab.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements-cortexlab.txt

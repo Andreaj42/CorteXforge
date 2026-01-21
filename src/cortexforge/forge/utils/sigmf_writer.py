@@ -44,14 +44,15 @@ def write_sigmf(
             {
                 "core:frequency": float(center_freq),
                 "core:sample_start": 0,
-                "core:datetime": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+                "core:datetime": datetime.now(timezone.utc)
+                .isoformat()
+                .replace("+00:00", "Z"),
                 "cortexforge:rx_gain": float(gain),
             }
         ],
-        "annotations": []
+        "annotations": [],
     }
 
     meta_path.parent.mkdir(parents=True, exist_ok=True)
     meta_path.write_text(json.dumps(meta, indent=2, sort_keys=True))
     return str(data_path), str(meta_path)
-
