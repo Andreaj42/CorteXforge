@@ -17,7 +17,7 @@ def main(args):
     logger.info(
         f"[RX] freq={defaults.FREQUENCY} rate={defaults.SAMPLE_RATE} "
         f"gain={defaults.RX_GAIN} ant={defaults.RX_ANTENNA} "
-        f"duration={defaults.DURATION} out={defaults.OUT_DIRECTORY}"
+        f"duration={defaults.DURATION} out={args.output_path}"
     )
 
     out_dir = args.output_path
