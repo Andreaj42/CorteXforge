@@ -5,4 +5,4 @@ TX_GAIN = 10
 RX_ANTENNA = "RX2"
 DEFAULT_TX_ANT = "TX/RX"
 DURATION = 30
-OUT_DIRECTORY = "/cortexlab/homes/andrea_joly/out"
+# OUT_DIRECTORY = "/cortexlab/homes/andrea_joly/out"

@@ -4,7 +4,6 @@
 import signal
 import time
 from datetime import datetime, timezone
-from pathlib import Path
 
 from cortexforge.forge.config import defaults
 from cortexforge.forge.radio.rx_record import rx_record
@@ -21,7 +20,7 @@ def main(args):
         f"duration={defaults.DURATION} out={defaults.OUT_DIRECTORY}"
     )
 
-    out_dir = Path(defaults.OUT_DIRECTORY)
+    out_dir = args.output_path
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # temp raw file (will be renamed to .sigmf-data)

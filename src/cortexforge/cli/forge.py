@@ -1,6 +1,7 @@
 """CLI argument parser for CorteXForge forge."""
 
 import argparse
+from pathlib import Path
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -20,13 +21,21 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     # RX
-    # rx_p = sub.add_parser("rx", help="Receiver mode")
-    sub.add_parser("rx", help="Receiver mode")
+    rx_p = sub.add_parser("rx", help="Receiver mode")
+    rx_p.add_argument(
+        "--output-path",
+        type=Path,
+        required=True,
+        help=(
+            "Path to output directory for results "
+            "(e.g. /cortexlab/homes/<username>/out)"
+        ),
+    )
 
     # TX
     tx_p = sub.add_parser("tx", help="Transmitter")
     tx_p.add_argument(
-        "--timeline", type=str, required=True, help="Path to timeline CSV"
+        "--timeline", type=Path, required=True, help="Path to timeline CSV"
     )
     return parser
 
