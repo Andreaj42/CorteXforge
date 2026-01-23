@@ -2,6 +2,12 @@ import argparse
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """
+    Build and configure the cli argument parser for CorteXForge planner.
+
+    Returns:
+        argparse.ArgumentParser: Configured argument parser instance with
+    """
     parser = argparse.ArgumentParser(
         prog="CorteXForge planner", description="Dataset Generator"
     )
@@ -17,6 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def parse_args(argv=None):
+def parse_args(argv=None) -> argparse.Namespace:
+    """Parse command line arguments."""
     parser = build_parser()
     return parser.parse_args(argv)
