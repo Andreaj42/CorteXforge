@@ -7,10 +7,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from cortexforge.forge.config import defaults
-from cortexforge.forge.utils.sigmf_writer import write_sigmf
-
 from cortexforge.forge.radio.rx_record import rx_record
 from cortexforge.forge.utils.logger import setup_logger
+from cortexforge.forge.utils.sigmf_writer import write_sigmf
+
 
 def main(args):
     logger = setup_logger()
