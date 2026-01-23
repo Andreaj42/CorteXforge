@@ -5,7 +5,16 @@ class RxRecorder(gr.top_block):
     """
     GNU Radio top block for recording from a USRP device.
     """
-    def __init__(self, usrp_args: str, freq: float, rate: float, gain: float, out_path: str, antenna: str) -> None:
+
+    def __init__(
+        self,
+        usrp_args: str,
+        freq: float,
+        rate: float,
+        gain: float,
+        out_path: str,
+        antenna: str,
+    ) -> None:
         super().__init__("Rx recorder")
 
         self.src = uhd.usrp_source(
