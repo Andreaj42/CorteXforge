@@ -1,3 +1,5 @@
+"""CLI argument parser for CorteXForge forge."""
+
 import argparse
 
 
@@ -9,7 +11,7 @@ def build_parser() -> argparse.ArgumentParser:
         argparse.ArgumentParser: Configured argument parser instance with
     """
     parser = argparse.ArgumentParser(
-        prog="CorteXForge", description="Dataset Generator"
+        prog="CorteXForge forge", description="Dataset Generator"
     )
     sub = parser.add_subparsers(
         dest="role",
@@ -29,7 +31,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def parse_args(argv=None) -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = build_parser()
     return parser.parse_args(argv)
