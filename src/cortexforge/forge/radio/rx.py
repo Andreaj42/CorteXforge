@@ -6,7 +6,7 @@ import time
 from datetime import datetime, timezone
 
 from cortexforge.forge.config import defaults
-from cortexforge.forge.radio.rx_record import rx_record
+from CorteXForge.src.cortexforge.forge.radio.rx_recorder import RxRecorder
 from cortexforge.forge.utils.logger import setup_logger
 from cortexforge.forge.utils.sigmf_writer import write_sigmf
 
@@ -28,7 +28,7 @@ def main(args):
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     base_path = out_dir / f"{stamp}"
 
-    tb = rx_record(
+    tb = RxRecord(
         usrp_args="",
         freq=defaults.FREQUENCY,
         rate=defaults.SAMPLE_RATE,

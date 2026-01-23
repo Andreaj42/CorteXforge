@@ -1,9 +1,9 @@
 from gnuradio import blocks, gr, uhd
 
 
-class rx_record(gr.top_block):
+class RxRecorder(gr.top_block):
     def __init__(self, usrp_args, freq, rate, gain, out_path, antenna):
-        super().__init__("RX record")
+        super().__init__("Rx recorder")
 
         self.src = uhd.usrp_source(
             usrp_args,
