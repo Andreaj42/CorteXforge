@@ -2,7 +2,10 @@ from gnuradio import blocks, gr, uhd
 
 
 class RxRecorder(gr.top_block):
-    def __init__(self, usrp_args, freq, rate, gain, out_path, antenna):
+    """
+    GNU Radio top block for recording from a USRP device.
+    """
+    def __init__(self, usrp_args: str, freq: float, rate: float, gain: float, out_path: str, antenna: str) -> None:
         super().__init__("Rx recorder")
 
         self.src = uhd.usrp_source(
