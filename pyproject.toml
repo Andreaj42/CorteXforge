@@ -8,20 +8,24 @@ version = "0.1.0"
 description = "Scenario/timeline planner + forge runner"
 requires-python = ">=3.10"
 dependencies = [
-    "numpy==2.3.4",
-    "pandas==2.3.3",
-    "python-dateutil==2.9.0.post0",
-    "pytz==2025.2",
-    "PyYAML==6.0.3",
-    "six==1.17.0",
-    "tzdata==2025.2",
+
 ]
 
 
 [project.optional-dependencies]
+planner = [
+  "numpy==2.3.4",
+  "pandas==2.3.3",
+  "python-dateutil==2.9.0.post0",
+  "pytz==2025.2",
+  "PyYAML==6.0.3",
+  "six==1.17.0",
+  "tzdata==2025.2",
+]
 forge = [
   "sigmf==1.2.12"
 ]
+
 
 [project.scripts]
 cortexforge-planner = "cortexforge.planner.main:main"
