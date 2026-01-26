@@ -1,22 +1,18 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import signal
 import time
 from datetime import datetime, timezone
 
 from cortexforge.forge.config import defaults
 from cortexforge.forge.radio.rx_recorder import RxRecorder
-from cortexforge.forge.utils.logger import setup_logger
+from cortexforge.utils.logger import setup_logger
 from cortexforge.forge.utils.sigmf_writer import write_sigmf
 
 
 def main(args):
     logger = setup_logger()
-    logger.info(args)
     logger.info(
         f"[RX] freq={defaults.FREQUENCY} rate={defaults.SAMPLE_RATE} "
-        f"gain={defaults.RX_GAIN} ant={defaults.RX_ANTENNA} "
+        f"gain={defaults.RX_GAIN} ant={defaults.ANTENNA} "
         f"duration={defaults.DURATION} out={args.output_path}"
     )
 
@@ -34,7 +30,7 @@ def main(args):
         rate=defaults.SAMPLE_RATE,
         gain=defaults.RX_GAIN,
         out_path=str(raw_path),
-        antenna=defaults.RX_ANTENNA,
+        antenna=defaults.ANTENNA,
     )
 
     stop_flag = {"stop": False}

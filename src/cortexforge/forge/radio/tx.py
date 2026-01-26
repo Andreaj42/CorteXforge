@@ -2,26 +2,19 @@ import time
 
 from cortexforge.forge.utils.load_timeline import load_timeline
 from cortexforge.forge.utils.node_identity import get_node_name
-
 from cortexforge.forge.config import defaults
 from cortexforge.forge.radio.tx_burst import tx_burst
 from cortexforge.forge.radio.waveforms import make_burst
-from cortexforge.forge.utils.logger import setup_logger
+from cortexforge.utils.logger import setup_logger
 
 
 def main(args):
     logger = setup_logger()
     node_name = get_node_name(logger)
     timeline_all = load_timeline(args.timeline)
-
+    logger.info(f"[TX] Loaded {len(timeline_all)} events total from {args.timeline}")
     timeline = [ev for ev in timeline_all if ev.get("radio") == node_name]
-
-    logger.info(
-        f"[TX] Loaded {len(timeline_all)} events total, selected {len(timeline)} for node={node_name}"
-    )
-
-    logger.info(f"[TX] Loaded {len(timeline)} events from {args.timeline}")
-    logger.info(f"[TX] default antenna={defaults.DEFAULT_TX_ANT}")
+    logger.info(f"[TX] Loaded {len(timeline)} events for node={node_name}")
 
     t0 = time.time()
 
@@ -52,7 +45,7 @@ def main(args):
             freq=ev["freq_hz"],
             rate=ev["sample_rate_sps"],
             gain=ev["tx_gain_db"],
-            antenna=defaults.DEFAULT_TX_ANT,
+            antenna=defaults.ANTENNA,
             iq=iq,
         )
         tb.run()
