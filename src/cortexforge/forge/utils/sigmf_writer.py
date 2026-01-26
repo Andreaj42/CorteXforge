@@ -1,4 +1,4 @@
-import json
+from json import dumps
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -26,7 +26,7 @@ def write_sigmf(
     meta_path = base.with_suffix(".sigmf-meta")
     data_path = base.with_suffix(".sigmf-data")
 
-    # Move (rename) the data to .sigmf-data if needed
+    # Move the data to .sigmf-data if needed
     if data_src.resolve() != data_path.resolve():
         data_path.parent.mkdir(parents=True, exist_ok=True)
         data_src.replace(data_path)
@@ -39,6 +39,7 @@ def write_sigmf(
             "core:datatype": datatype,
             "core:sample_rate": float(sample_rate),
             "core:version": "1.0.0",
+            
         },
         "captures": [
             {
@@ -54,5 +55,5 @@ def write_sigmf(
     }
 
     meta_path.parent.mkdir(parents=True, exist_ok=True)
-    meta_path.write_text(json.dumps(meta, indent=2, sort_keys=True))
+    meta_path.write_text(dumps(meta, indent=2, sort_keys=True))
     return str(data_path), str(meta_path)
