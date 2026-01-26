@@ -12,9 +12,8 @@ class RxRecorder(gr.top_block):
         freq: float,
         rate: float,
         gain: float,
-        out_path: str,
-        antenna: str,
-    ) -> None:
+        out_path: str
+        ) -> None:
         super().__init__("Rx recorder")
 
         self.src = uhd.usrp_source(
@@ -25,7 +24,7 @@ class RxRecorder(gr.top_block):
         self.src.set_samp_rate(rate)
         self.src.set_center_freq(freq, 0)
         self.src.set_gain(gain, 0)
-        self.src.set_antenna(antenna, 0)
+        self.src.set_antenna("TX/RX", 0)
 
         self.sink = blocks.file_sink(gr.sizeof_gr_complex, out_path, False)
         self.sink.set_unbuffered(False)

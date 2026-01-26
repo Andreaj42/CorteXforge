@@ -3,7 +3,7 @@ from gnuradio import blocks, gr, uhd
 
 
 class tx_burst(gr.top_block):
-    def __init__(self, usrp_args, freq, rate, gain, antenna, iq):
+    def __init__(self, usrp_args, freq, rate, gain, iq):
         super().__init__("TX burst")
 
         iq_np = np.asarray(iq, dtype=np.complex64)
@@ -18,6 +18,6 @@ class tx_burst(gr.top_block):
         self.sink.set_samp_rate(rate)
         self.sink.set_center_freq(freq, 0)
         self.sink.set_gain(gain, 0)
-        self.sink.set_antenna(antenna, 0)
+        self.sink.set_antenna("TX/RX", 0)
 
         self.connect(self.src, self.sink)

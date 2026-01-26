@@ -45,7 +45,6 @@ def main(args):
             freq=ev["freq_hz"],
             rate=ev["sample_rate_sps"],
             gain=ev["tx_gain_db"],
-            antenna=defaults.ANTENNA,
             iq=iq,
         )
         tb.run()

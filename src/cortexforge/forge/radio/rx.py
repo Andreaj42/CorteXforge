@@ -12,7 +12,7 @@ def main(args):
     logger = setup_logger()
     logger.info(
         f"[RX] freq={defaults.FREQUENCY} rate={defaults.SAMPLE_RATE} "
-        f"gain={defaults.RX_GAIN} ant={defaults.ANTENNA} "
+        f"gain={defaults.RX_GAIN}"
         f"duration={defaults.DURATION} out={args.output_path}"
     )
 
@@ -30,7 +30,6 @@ def main(args):
         rate=defaults.SAMPLE_RATE,
         gain=defaults.RX_GAIN,
         out_path=str(raw_path),
-        antenna=defaults.ANTENNA,
     )
 
     stop_flag = {"stop": False}
