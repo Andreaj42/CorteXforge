@@ -3,7 +3,10 @@ from gnuradio import blocks, gr, uhd
 
 
 class tx_burst(gr.top_block):
-    def __init__(self, usrp_args, freq, rate, gain, iq):
+    """
+    GNU Radio top block for transmitting a burst from a USRP device.
+    """
+    def __init__(self, usrp_args: str, freq: float, rate: float, gain:float, iq) -> None:
         super().__init__("TX burst")
 
         iq_np = np.asarray(iq, dtype=np.complex64)
