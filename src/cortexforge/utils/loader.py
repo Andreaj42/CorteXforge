@@ -17,7 +17,7 @@ def load_yaml(path: str | Path) -> dict:
 
 def load_nodes(path: str | Path = "configs/nodes.yaml") -> list[str]:
     """
-    Load node IDs from a YAML configuration configs/nodes/yaml file.
+    Load node IDs from a YAML configuration configs/nodes.yaml file.
 
     Expected YAML format:
     nodes:
