@@ -1,6 +1,7 @@
 """CLI argument parser for CorteXForge planner."""
 
 import argparse
+from pathlib import Path
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -13,12 +14,21 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="CorteXForge planner", description="Dataset Generator"
     )
+    parser.add_argument("--username", type=str, help="username on CorteXlab")
     parser.add_argument(
-        "--duration", type=int, default=600, help="Experiment duration in seconds"
+        "--duration", type=int, default=60, help="Experiment duration in seconds"
     )
     parser.add_argument(
+        "--rx-frequency", type=int, default=2450000000, help="Receiver frequency"
+    )
+    parser.add_argument("--rx-gain", type=int, default=10, help="Receiver gain")
+    parser.add_argument(
+        "--rx-sample-rate", type=int, default=250000, help="Receiver sample-rate"
+    )
+
+    parser.add_argument(
         "--nodes-path",
-        type=str,
+        type=Path,
         default="configs/nodes.yaml",
         help="Path to nodes.yaml file",
     )
