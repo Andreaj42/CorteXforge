@@ -7,22 +7,31 @@ from yaml import safe_dump
 logger = logging.getLogger(__name__)
 
 
-def generate_cortex_scenario(
+def generate_cortexlab_scenario(
     nodes: List[str],
     duration: int,
     image: str,
-    command: str,
+    rx_command: str,
+    tx_command: str,
     description: str = "Dataset Generator",
     output_path: str = "scenario.yaml",
 ):
     data = {"description": description, "duration": duration, "nodes": {}}
-
-    for node in nodes:
+    rx_node = nodes[0]
+    data["nodes"][rx_node.replace("mnode", "node")] = {
+        "container": [
+            {
+                "image": image,
+                "command": rx_command,
+            }
+        ]
+    }
+    for node in nodes[1:]:
         data["nodes"][node.replace("mnode", "node")] = {
             "container": [
                 {
                     "image": image,
-                    "command": command,
+                    "command": tx_command,
                 }
             ]
         }
