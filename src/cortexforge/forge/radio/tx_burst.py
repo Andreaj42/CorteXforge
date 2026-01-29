@@ -6,7 +6,10 @@ class tx_burst(gr.top_block):
     """
     GNU Radio top block for transmitting a burst from a USRP device.
     """
-    def __init__(self, usrp_args: str, freq: float, rate: float, gain:float, iq) -> None:
+
+    def __init__(
+        self, usrp_args: str, freq: float, rate: float, gain: float, iq
+    ) -> None:
         super().__init__("TX burst")
 
         iq_np = np.asarray(iq, dtype=np.complex64)
