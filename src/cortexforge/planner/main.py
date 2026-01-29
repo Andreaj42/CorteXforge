@@ -24,11 +24,11 @@ def main() -> None:
             f"--frequency {args.rx_frequency} "
             f"--gain {args.rx_gain} "
             f"--sample-rate {args.rx_sample_rate} "
-            f'--output-path cortexlab/homes/{args.username}/out/"'
+            f'--output-path /cortexlab/homes/{args.username}/out/"'
         ),
         tx_command=(
             f'bash -lc "cortexforge-forge tx '
-            f'--timeline cortexlab/homes/{args.username}/timeline.csv"'
+            f'--timeline /cortexlab/homes/{args.username}/timeline.csv"'
         ),
         description="Dataset Generator",
         output_path="configs/scenario.yaml",
