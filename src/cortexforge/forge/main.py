@@ -4,7 +4,7 @@ from cortexforge.utils.logger import setup_logger
 logger = setup_logger()
 
 
-def main():
+def main() -> None:
     args = parse_args()
     logger.info("Starting CorteXForge...")
     logger.info(f"Args={args}")
