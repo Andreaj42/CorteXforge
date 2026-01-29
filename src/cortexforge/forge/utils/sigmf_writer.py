@@ -8,10 +8,9 @@ def write_sigmf(
     data_file: str,
     sample_rate: float,
     center_freq: float,
-    datatype: str = "cf32_le",
+    gain: float,
     description: str = "CorteXForge capture",
     author: str = "CorteXForge",
-    gain: float | None = None,
 ):
     """
     base_path: path without extension, e.g. /.../out/noise_node6
@@ -36,7 +35,7 @@ def write_sigmf(
             "core:author": author,
             "core:description": description,
             "core:recorder": "CorteXForge",
-            "core:datatype": datatype,
+            "core:datatype": "sc16_le",
             "core:sample_rate": float(sample_rate),
             "core:version": "1.0.0",
         },
@@ -47,7 +46,7 @@ def write_sigmf(
                 "core:datetime": datetime.now(timezone.utc)
                 .isoformat()
                 .replace("+00:00", "Z"),
-                "cortexforge:rx_gain": float(gain),
+                "cortexforge:rx_gain": gain,
             }
         ],
         "annotations": [],
