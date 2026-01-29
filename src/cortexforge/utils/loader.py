@@ -6,16 +6,15 @@ import yaml
 logger = logging.getLogger(__name__)
 
 
-def load_yaml(path: str | Path) -> dict:
+def load_yaml(path: Path) -> dict:
     """Load a YAML file and return its contents as a dictionary."""
-    path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
     with path.open("r") as f:
         return yaml.safe_load(f)
 
 
-def load_nodes(path: str | Path = "configs/nodes.yaml") -> list[str]:
+def load_nodes(path: Path = "configs/nodes.yaml") -> list[str]:
     """
     Load node IDs from a YAML configuration configs/nodes.yaml file.
 
