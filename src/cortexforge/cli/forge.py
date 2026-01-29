@@ -1,17 +1,17 @@
 """CLI argument parser for CorteXForge forge."""
 
-import argparse
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 
-def build_parser() -> argparse.ArgumentParser:
+def build_parser() -> ArgumentParser:
     """
     Build and configure the cli argument parser for CorteXForge forge.
 
     Returns:
-        argparse.ArgumentParser: Configured argument parser instance with
+        ArgumentParser: Configured argument parser instance with
     """
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="CorteXForge forge", description="Dataset Generator"
     )
     sub = parser.add_subparsers(
@@ -20,9 +20,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Radio role for this node (rx=receiver, tx=transmitter)",
     )
 
-    # RX
-    rx_p = sub.add_parser("rx", help="Receiver mode")
-    rx_p.add_argument(
+    rx = sub.add_parser("rx", help="Receiver mode")
+    rx.add_argument(
+        "--frequency", type=int, required=True, help="Receiver center frequency (Hz)")
+    rx.add_argument(
+        "--sample-rate", type=int, required=True, help="Receiver sample rate (Sps)")
+    rx.add_argument(
+        "--gain", type=int, required=True, help="Receiver gain (dB)")
+    rx.add_argument(
+        "--duration", type=int, required=True, help="Capture duration (seconds)")
+    rx.add_argument(
         "--output-path",
         type=Path,
         required=True,
@@ -32,15 +39,14 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
 
-    # TX
-    tx_p = sub.add_parser("tx", help="Transmitter")
-    tx_p.add_argument(
+    tx = sub.add_parser("tx", help="Transmitter")
+    tx.add_argument(
         "--timeline", type=Path, required=True, help="Path to timeline CSV"
     )
     return parser
 
 
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> Namespace:
     """Parse command line arguments."""
     parser = build_parser()
     return parser.parse_args(argv)
