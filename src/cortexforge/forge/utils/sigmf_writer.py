@@ -1,5 +1,5 @@
-from json import dumps
 from datetime import datetime, timezone
+from json import dumps
 from pathlib import Path
 
 
@@ -39,7 +39,6 @@ def write_sigmf(
             "core:datatype": datatype,
             "core:sample_rate": float(sample_rate),
             "core:version": "1.0.0",
-            
         },
         "captures": [
             {
