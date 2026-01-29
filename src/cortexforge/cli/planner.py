@@ -1,17 +1,17 @@
 """CLI argument parser for CorteXForge planner."""
 
-import argparse
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 
-def build_parser() -> argparse.ArgumentParser:
+def build_parser() -> ArgumentParser:
     """
     Build and configure the cli argument parser for CorteXForge planner.
 
     Returns:
-        argparse.ArgumentParser: Configured argument parser instance with
+        ArgumentParser: Configured argument parser instance with
     """
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         prog="CorteXForge planner", description="Dataset Generator"
     )
     parser.add_argument("--username", type=str, help="username on CorteXlab")
@@ -35,7 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> Namespace:
     """Parse command line arguments."""
     parser = build_parser()
     return parser.parse_args(argv)
