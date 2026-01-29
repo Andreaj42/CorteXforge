@@ -53,5 +53,5 @@ def write_sigmf(
     }
 
     meta_path.parent.mkdir(parents=True, exist_ok=True)
-    meta_path.write_text(dumps(meta, indent=2, sort_keys=True))
+    meta_path.write_text(dumps(meta, indent=2))
     return str(data_path), str(meta_path)
