@@ -1,14 +1,14 @@
 import time
+from logging import getLogger
 
 from cortexforge.forge.utils.load_timeline import load_timeline
 from cortexforge.forge.utils.node_identity import get_node_name
 from cortexforge.forge.radio.tx_burst import tx_burst
 from cortexforge.forge.radio.waveforms import make_burst
-from cortexforge.utils.logger import setup_logger
 
+logger = getLogger(__name__)
 
 def main(args):
-    logger = setup_logger()
     node_name = get_node_name(logger)
     timeline_all = load_timeline(args.timeline)
     logger.info(f"Loaded {len(timeline_all)} events total from {args.timeline}")

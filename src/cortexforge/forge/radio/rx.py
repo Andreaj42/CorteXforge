@@ -1,13 +1,13 @@
+from logging import getLogger
 from time import time, sleep
 from datetime import datetime, timezone
 
 from cortexforge.forge.radio.rx_recorder import RxRecorder
-from cortexforge.utils.logger import setup_logger
 from cortexforge.forge.utils.sigmf_writer import write_sigmf
 
+logger = getLogger(__name__)
 
 def main(args):
-    logger = setup_logger()
     out_dir = args.output_path
     out_dir.mkdir(parents=True, exist_ok=True)
 
