@@ -38,6 +38,7 @@ def main(args):
         data_file=str(raw_path),
         sample_rate=args.sample_rate,
         center_freq=args.frequency,
+        hardware=tb.src.get_usrp_info().get("mboard_id"),
         author="Andrea Joly",
         description="CorteXForge RX recording",
         gain=args.gain,

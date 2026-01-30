@@ -1,7 +1,15 @@
 from datetime import datetime, timezone
 from json import dumps
 from pathlib import Path
+import hashlib
 
+def _sha512_hex(path: Path, chunk_size: int = 1024 * 1024) -> str:
+    """Compute SHA-512 hash of a file and return it as a hex string."""
+    h = hashlib.sha512()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(chunk_size), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 def write_sigmf(
     base_path: str,
@@ -9,6 +17,7 @@ def write_sigmf(
     sample_rate: float,
     center_freq: float,
     gain: float,
+    hardware: str,
     description: str = "CorteXForge capture",
     author: str = "CorteXForge",
 ):
@@ -34,18 +43,20 @@ def write_sigmf(
         "global": {
             "core:author": author,
             "core:description": description,
-            "core:recorder": "CorteXForge",
+            "core:recorder": "CorteXForge 0.1",
+            "core:hw": hardware,
             "core:datatype": "sc16_le",
             "core:sample_rate": float(sample_rate),
-            "core:version": "1.0.0",
+            "core:data_file": data_path.name,
+            "core:sha512": _sha512_hex(data_path),
         },
         "captures": [
             {
-                "core:frequency": float(center_freq),
-                "core:sample_start": 0,
                 "core:datetime": datetime.now(timezone.utc)
                 .isoformat()
                 .replace("+00:00", "Z"),
+                "core:frequency": float(center_freq),
+                "core:sample_start": 0,
                 "cortexforge:rx_gain": gain,
             }
         ],
