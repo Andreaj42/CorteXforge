@@ -3,7 +3,7 @@ from logging import getLogger
 
 from cortexforge.forge.utils.load_timeline import load_timeline
 from cortexforge.forge.utils.node_identity import get_node_name
-from cortexforge.forge.radio.tx_burst import tx_burst
+from cortexforge.forge.radio.tx_burst import TxBurst
 from cortexforge.forge.radio.waveforms import make_burst
 
 logger = getLogger(__name__)
@@ -39,7 +39,7 @@ def main(args):
             amplitude=ev["amplitude"],
         )
 
-        tb = tx_burst(
+        tb = TxBurst(
             usrp_args="",
             freq=ev["freq_hz"],
             rate=ev["sample_rate_sps"],
