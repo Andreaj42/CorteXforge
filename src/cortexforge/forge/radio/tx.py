@@ -9,7 +9,7 @@ from cortexforge.forge.radio.waveforms import make_burst
 logger = getLogger(__name__)
 
 def main(args):
-    node_name = get_node_name(logger)
+    node_name = get_node_name()
     timeline_all = load_timeline(args.timeline)
     logger.info(f"Loaded {len(timeline_all)} events total from {args.timeline}")
     timeline = [ev for ev in timeline_all if ev.get("radio") == node_name]

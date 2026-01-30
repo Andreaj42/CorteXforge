@@ -1,9 +1,12 @@
 """Get node name identity."""
 
 from socket import gethostname
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
-def get_node_name(logger=None) -> str:
+def get_node_name() -> str:
     try:
         hostname = gethostname()
         return hostname
