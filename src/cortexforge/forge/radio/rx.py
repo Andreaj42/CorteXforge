@@ -2,6 +2,7 @@ from logging import getLogger
 from time import time, sleep
 from datetime import datetime, timezone
 
+from cortexforge.forge.utils.node_identity import get_node_name
 from cortexforge.forge.radio.rx_recorder import RxRecorder
 from cortexforge.forge.utils.sigmf_writer import write_sigmf
 
@@ -38,9 +39,9 @@ def main(args):
         data_file=str(raw_path),
         sample_rate=args.sample_rate,
         center_freq=args.frequency,
-        hardware=tb.src.get_usrp_info().get("mboard_id"),
+        hardware=f"{get_node_name()} + {tb.src.get_usrp_info().get('mboard_id')}",
         author="Andrea Joly",
-        description="CorteXForge RX recording",
+        description="CorteXForge recording",
         gain=args.gain,
     )
     logger.info(f"SigMF written: {data_path} and {meta_path}")
