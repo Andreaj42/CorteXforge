@@ -3,6 +3,7 @@ from json import dumps
 from pathlib import Path
 import hashlib
 
+
 def _sha512_hex(path: Path, chunk_size: int = 1024 * 1024) -> str:
     """Compute SHA-512 hash of a file and return it as a hex string."""
     h = hashlib.sha512()
@@ -43,7 +44,7 @@ def write_sigmf(
         "global": {
             "core:author": author,
             "core:description": description,
-            "core:recorder": "CorteXForge 0.1",
+            "core:recorder": "CorteXForge",
             "core:hw": hardware,
             "core:datatype": "sc16_le",
             "core:sample_rate": float(sample_rate),
