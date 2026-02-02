@@ -25,7 +25,6 @@ def main(args):
         out_path=str(raw_path),
     )
 
-
     tb.start()
     t0 = time()
     while time() - t0 < args.duration:
@@ -39,7 +38,7 @@ def main(args):
         data_file=str(raw_path),
         sample_rate=args.sample_rate,
         center_freq=args.frequency,
-        hardware=f"{get_node_name()} + {tb.src.get_usrp_info().get('mboard_id')}",
+        hardware=f"{get_node_name()}, {tb.src.get_usrp_info().get('mboard_id')}",
         author="Andrea Joly",
         description="CorteXForge recording",
         gain=args.gain,
