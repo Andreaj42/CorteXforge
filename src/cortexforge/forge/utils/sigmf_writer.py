@@ -58,7 +58,7 @@ def write_sigmf(
                 .replace("+00:00", "Z"),
                 "core:frequency": float(center_freq),
                 "core:sample_start": 0,
-                "cortexforge:rx_gain": gain,
+                "cortexforge:gain": gain,
             }
         ],
         "annotations": [],
