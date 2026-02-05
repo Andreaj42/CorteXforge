@@ -18,6 +18,7 @@ def write_sigmf(
     sample_rate: float,
     center_freq: float,
     gain: float,
+    stat,
     hardware: str,
     description: str = "CorteXForge capture",
     author: str = "CorteXForge",
@@ -46,7 +47,7 @@ def write_sigmf(
             "core:description": description,
             "core:recorder": "CorteXForge",
             "core:hw": hardware,
-            "core:datatype": "sc16_le",
+            "core:datatype": "cf32_le",
             "core:sample_rate": float(sample_rate),
             "core:data_file": data_path.name,
             "core:sha512": _sha512_hex(data_path),
@@ -59,6 +60,11 @@ def write_sigmf(
                 "core:frequency": float(center_freq),
                 "core:sample_start": 0,
                 "cortexforge:gain": gain,
+                "cortexforge:baseline": {
+                    "sample_start": stat["skip_samples"],
+                    "sample_count": stat["win_samples"],
+                    "power_dbfs": stat["power_dbfs"]
+                }
             }
         ],
         "annotations": [],
