@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from cortexforge.forge.utils.node_identity import get_node_name
 from cortexforge.forge.radio.rx_recorder import RxRecorder
 from cortexforge.forge.utils.sigmf_writer import write_sigmf
+from cortexforge.forge.utils.compute_baseline import compute_baseline
 
 logger = getLogger(__name__)
 
@@ -13,7 +14,7 @@ def main(args):
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # temp raw file (will be renamed to .sigmf-data)
-    raw_path = out_dir / "temp.sc16"
+    raw_path = out_dir / "temp.cf32"
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     base_path = out_dir / f"{stamp}"
 
@@ -32,10 +33,17 @@ def main(args):
 
     tb.stop()
     tb.wait()
+    
+    stats = compute_baseline(
+        path=str(raw_path),
+        sample_rate=args.sample_rate
+    )
 
+    logger.info(f"Recording stats: {stats}")
     data_path, meta_path = write_sigmf(
         base_path=str(base_path),
         data_file=str(raw_path),
+        stat=stats,
         sample_rate=args.sample_rate,
         center_freq=args.frequency,
         hardware=f"{get_node_name()}, {tb.src.get_usrp_info().get('mboard_id')}",
