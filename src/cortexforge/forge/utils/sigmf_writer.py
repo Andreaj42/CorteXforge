@@ -3,6 +3,8 @@ from json import dumps
 from pathlib import Path
 import hashlib
 
+from cortexforge.forge.utils.node_identity import get_node_name
+
 
 def _sha512_hex(path: Path, chunk_size: int = 1024 * 1024) -> str:
     """Compute SHA-512 hash of a file and return it as a hex string."""
@@ -59,6 +61,7 @@ def write_sigmf(
                 .replace("+00:00", "Z"),
                 "core:frequency": float(center_freq),
                 "core:sample_start": 0,
+                "cortexforge:node": get_node_name(),
                 "cortexforge:gain": gain,
                 "cortexforge:baseline": {
                     "sample_start": stat["skip_samples"],
