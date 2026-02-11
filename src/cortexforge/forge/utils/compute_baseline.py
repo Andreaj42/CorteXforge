@@ -26,7 +26,7 @@ def compute_baseline(path, sample_rate, skip=0.5, win_size=1.0):
     power_dbfs = 10.0 * math.log10(mean_power / 2.0)
 
     return {
-        "skip_samples": float(skip_samples),
-        "win_samples": float(win_samples),
-        "power_dbfs": float(power_dbfs)
+        "skip_samples": skip_samples,
+        "win_samples": win_samples,
+        "power_dbfs": power_dbfs
     }
