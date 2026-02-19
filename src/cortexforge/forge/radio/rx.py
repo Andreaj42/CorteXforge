@@ -1,11 +1,15 @@
 from logging import getLogger
-from time import time, sleep
+from time import sleep
 from datetime import datetime, timezone
 
 from cortexforge.forge.radio.rx_recorder import RxRecorder
 from cortexforge.forge.utils.sigmf_writer import write_sigmf
 from cortexforge.forge.utils.compute_baseline import compute_baseline
 from cortexforge.forge.utils.load_timeline import load_timeline
+from cortexforge.forge.utils.sync_barrier.rx_barrier_server import RxBarrierServer
+from cortexforge.forge.utils.sync_barrier.sync_config import SyncConfig
+from cortexforge.forge.utils.uhd_time import arm_time_reset_next_pps
+
 
 logger = getLogger(__name__)
 
@@ -53,15 +57,29 @@ def main(args):
         gain=args.gain,
         out_path=str(raw_path),
     )
+    cfg = SyncConfig(
+        server_host="mnode24",
+        port_reg=5555,
+        port_pub=5556,
+        expected_tx=3,
+    )
+    barrier = RxBarrierServer(cfg)
+    barrier.wait_for_all()
+
+    barrier.broadcast({"type": "GO"})
+    arm_time_reset_next_pps(tb.src)
+    #logger.info("Current UHD time (before starting record): %f", tb.src.get_time_now().get_real_secs())
 
     tb.start()
-    t0 = time()
-    while time() - t0 < args.duration:
-        sleep(0.05)
+    #logger.info("Current UHD time (starting record): %f", tb.src.get_time_now().get_real_secs())
+
+    while tb.src.get_time_now().get_real_secs() < args.duration:
+        sleep(0.001)
 
     tb.stop()
     tb.wait()
-    
+    #logger.info("Current UHD time (stop recording): %f", tb.src.get_time_now().get_real_secs())
+
     stats = compute_baseline(
         path=str(raw_path),
         sample_rate=args.sample_rate

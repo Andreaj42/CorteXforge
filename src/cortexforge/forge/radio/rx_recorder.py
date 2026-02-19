@@ -17,7 +17,8 @@ class RxRecorder(gr.top_block):
             usrp_args,
             uhd.stream_args(cpu_format="fc32", channels=[self.rx_channel]),
         )
-        self.src.set_clock_source("internal", self.rx_channel)
+        self.src.set_clock_source("external", self.rx_channel)
+        self.src.set_time_source("external", self.rx_channel)
         self.src.set_samp_rate(rate)
         self.src.set_center_freq(freq, self.rx_channel)
         self.src.set_rx_agc(False)
