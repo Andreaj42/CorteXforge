@@ -21,6 +21,7 @@ def write_sigmf(
     center_freq: float,
     gain: float,
     stat,
+    annotations,
     hardware: str,
     description: str = "CorteXForge capture",
     author: str = "CorteXForge",
@@ -48,7 +49,6 @@ def write_sigmf(
             "core:author": author,
             "core:description": description,
             "core:recorder": "CorteXForge",
-            "core:hw": hardware,
             "core:datatype": "cf32_le",
             "core:sample_rate": float(sample_rate),
             "core:data_file": data_path.name,
@@ -62,6 +62,7 @@ def write_sigmf(
                 "core:frequency": float(center_freq),
                 "core:sample_start": 0,
                 "cortexforge:node": get_node_name(),
+                "core:hw": hardware,
                 "cortexforge:gain": gain,
                 "cortexforge:baseline": {
                     "sample_start": stat["skip_samples"],
@@ -70,7 +71,7 @@ def write_sigmf(
                 }
             }
         ],
-        "annotations": [],
+        "annotations": annotations,
     }
 
     meta_path.parent.mkdir(parents=True, exist_ok=True)

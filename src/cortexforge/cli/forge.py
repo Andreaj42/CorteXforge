@@ -30,6 +30,8 @@ def build_parser() -> ArgumentParser:
     rx.add_argument(
         "--duration", type=int, required=True, help="Capture duration (seconds)")
     rx.add_argument(
+        "--timeline", type=Path, required=True, help="Path to timeline CSV")
+    rx.add_argument(
         "--output-path",
         type=Path,
         required=True,
@@ -41,8 +43,7 @@ def build_parser() -> ArgumentParser:
 
     tx = sub.add_parser("tx", help="Transmitter")
     tx.add_argument(
-        "--timeline", type=Path, required=True, help="Path to timeline CSV"
-    )
+        "--timeline", type=Path, required=True, help="Path to timeline CSV")
     return parser
 
 

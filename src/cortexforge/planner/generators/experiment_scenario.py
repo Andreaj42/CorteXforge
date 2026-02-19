@@ -36,7 +36,7 @@ class ExperimentScenario:
         self.warmup_time = warmup_time
         self.rx_node = nodes[0]
         self.tx_nodes = nodes[1:]
-        self.modulations = ["BPSK", "QPSK", "QAM16"]
+        self.modulations = ["OOK", "BPSK", "QPSK", "8PSK", "16PSK", "32PSK", "16QAM", "32QAM", "64QAM", "128QAM", "256QAM"]
         self.snr_range = (0.0, 30.0)
         self.freq_range = (160, 6.6e6)
         self.tx_frequency = rx_frequency

@@ -3,50 +3,71 @@ from logging import getLogger
 
 from cortexforge.forge.utils.load_timeline import load_timeline
 from cortexforge.forge.utils.node_identity import get_node_name
-from cortexforge.forge.radio.tx_burst import TxBurst
+from cortexforge.forge.radio.tx_burst import TxTimeline
 from cortexforge.forge.radio.waveforms import make_burst
+from cortexforge.forge.utils.sync_barrier.tx_barrier_client import TxBarrierClient
+from cortexforge.forge.utils.sync_barrier.sync_config import SyncConfig
+from cortexforge.forge.utils.uhd_time import arm_time_reset_next_pps
+
 
 logger = getLogger(__name__)
-
 def main(args):
     node_name = get_node_name()
     timeline_all = load_timeline(args.timeline)
-    logger.info(f"Loaded {len(timeline_all)} events total from {args.timeline}")
     timeline = [ev for ev in timeline_all if ev.get("radio") == node_name]
-    logger.info(f"Loaded {len(timeline)} events for node {node_name}")
 
-    t0 = time.time()
 
+    # Prepare I/Q burst
+    events_with_iq = []
     for ev in timeline:
-        now = time.time()
-        dt = (t0 + ev["t_start_s"]) - now
-        if dt > 0:
-            time.sleep(dt)
-
-        logger.info(
-            f"event start={ev['t_start_s']}s dur={ev['duration_s']}s "
-            f"f={ev['freq_hz']} rate={ev['sample_rate_sps']} gain={ev['tx_gain_db']} "
-            f"amp={ev['amplitude']} mod={ev['modulation']} symrate={ev['symbol_rate']} "
-            f"rolloff={ev['rolloff']}"
-        )
-
         iq = make_burst(
             modulation=ev["modulation"],
-            sample_rate=ev["sample_rate_sps"],
+            sample_rate=250000,
             symbol_rate=ev["symbol_rate"],
             duration_s=ev["duration_s"],
             rolloff=ev["rolloff"],
             amplitude=ev["amplitude"],
-        )
+        ).astype("complex64")
 
-        tb = TxBurst(
-            usrp_args="",
-            freq=ev["freq_hz"],
-            rate=ev["sample_rate_sps"],
-            gain=ev["tx_gain_db"],
-            iq=iq,
-        )
-        tb.run()
-        tb.stop()
+        ev2 = dict(ev)
+        ev2["iq"] = iq
+        events_with_iq.append(ev2)
 
+        logger.info(
+            f"event start={ev['t_start_s']} dur={ev['duration_s']} "
+            f"f={ev['freq_hz']} gain={ev['tx_gain_db']} mod={ev['modulation']}"
+        )
+    
+    tb = TxTimeline(
+        usrp_args="",
+        rate=250000,
+        center_freq=events_with_iq[0]["freq_hz"],
+        gain=events_with_iq[0]["tx_gain_db"],
+        events_with_iq=events_with_iq
+    )
+
+    cfg = SyncConfig(server_host="mnode24", port_reg=5555, port_pub=5556)
+    client = TxBarrierClient(cfg, node_name=node_name)
+    client.register()
+
+    msg = client.wait_broadcast()
+    assert msg["type"] == "GO"
+
+    #logger.info(f"UHD before reset: {tb.sink.get_time_now().get_real_secs():.6f} s")
+
+    arm_time_reset_next_pps(tb.sink)
+    #logger.info(f"UHD after reset: {tb.sink.get_time_now().get_real_secs():.6f} s")
+
+    tb.start()
+    #logger.info(f"UHD time at start: {tb.sink.get_time_now().get_real_secs():.6f} s")
+
+    # 5) Attendre jusqu’à la fin du dernier burst
+    last_ev = max(events_with_iq, key=lambda e: e["t_start_s"] + e["duration_s"])
+    t_end = float(last_ev["t_start_s"] + last_ev["duration_s"]) + 1.0 
+
+    while tb.sink.get_time_now().get_real_secs() < t_end:
+        time.sleep(0.001)
+
+    tb.stop()
+    tb.wait()
     logger.info("Timeline complete.")
