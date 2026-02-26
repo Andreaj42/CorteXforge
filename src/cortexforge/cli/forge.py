@@ -44,6 +44,8 @@ def build_parser() -> ArgumentParser:
     tx = sub.add_parser("tx", help="Transmitter")
     tx.add_argument(
         "--timeline", type=Path, required=True, help="Path to timeline CSV")
+    tx.add_argument(
+        "--record-node", type=str, required=True, help="Select the recorder node")
     return parser
 
 

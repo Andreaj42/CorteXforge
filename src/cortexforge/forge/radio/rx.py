@@ -9,46 +9,24 @@ from cortexforge.forge.utils.load_timeline import load_timeline
 from cortexforge.forge.utils.sync_barrier.rx_barrier_server import RxBarrierServer
 from cortexforge.forge.utils.sync_barrier.sync_config import SyncConfig
 from cortexforge.forge.utils.uhd_time import arm_time_reset_next_pps
+from cortexforge.forge.utils.sigmf.sigmf_annotations import timeline_to_sigmf_annotations
+from cortexforge.forge.utils.node_identity import get_node_name
 
 
 logger = getLogger(__name__)
-
-def timeline_to_sigmf_annotations(events, rx_sample_rate):
-    ann = []
-    for ev in events:
-        start = int(round(ev["t_start_s"] * rx_sample_rate))
-        count = int(round(ev["duration_s"] * rx_sample_rate))
-
-        bw = (1.0 + ev["rolloff"]) * ev["symbol_rate"]
-        f0 = ev["freq_hz"]
-        f_low = f0 - bw / 2.0
-        f_high = f0 + bw / 2.0
-
-        ann.append({
-            "core:sample_start": start,
-            "core:sample_count": count,
-            "core:freq_lower_edge": f_low,
-            "core:freq_upper_edge": f_high,
-            "core:label": str(ev["modulation"]),
-            "cortexforge:radio": ev["radio"],
-            "cortexforge:tx_gain_db": ev["tx_gain_db"],
-            "cortexforge:amplitude": ev["amplitude"],
-            "cortexforge:symbol_rate": ev["symbol_rate"],
-            "cortexforge:rolloff": ev["rolloff"]
-        })
-
-    ann.sort(key=lambda a: a["core:sample_start"])
-    return ann
 
 
 def main(args):
     out_dir = args.output_path
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # temp raw file (will be renamed to .sigmf-data)
+    timeline = load_timeline(args.timeline)
+
+    radios = {str(ev["radio"]) for ev in timeline if ev.get("radio")}
+
+    logger.debug(f"Radios in timeline: {radios}, expecting {len(radios)} to synchronize")
+
     raw_path = out_dir / "temp.cf32"
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    base_path = out_dir / f"{stamp}"
 
     tb = RxRecorder(
         usrp_args="",
@@ -58,32 +36,34 @@ def main(args):
         out_path=str(raw_path),
     )
     cfg = SyncConfig(
-        server_host="mnode24",
+        server_host=get_node_name(),
         port_reg=5555,
         port_pub=5556,
-        expected_tx=3,
+        expected_tx=len(radios),
     )
     barrier = RxBarrierServer(cfg)
     barrier.wait_for_all()
 
     barrier.broadcast({"type": "GO"})
     arm_time_reset_next_pps(tb.src)
-    #logger.info("Current UHD time (before starting record): %f", tb.src.get_time_now().get_real_secs())
-
+    
     tb.start()
-    #logger.info("Current UHD time (starting record): %f", tb.src.get_time_now().get_real_secs())
+    rx_uhd_t0 = tb.src.get_time_now().get_real_secs()
 
-    while tb.src.get_time_now().get_real_secs() < args.duration:
+    while tb.src.get_time_now().get_real_secs() < rx_uhd_t0 + args.duration:
         sleep(0.001)
 
     tb.stop()
     tb.wait()
-    #logger.info("Current UHD time (stop recording): %f", tb.src.get_time_now().get_real_secs())
 
     stats = compute_baseline(
         path=str(raw_path),
         sample_rate=args.sample_rate
     )
+
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    base_path = out_dir / f"{stamp}"
+
 
     logger.info(f"Recording stats: {stats}")
     data_path, meta_path = write_sigmf(
@@ -99,6 +79,7 @@ def main(args):
         annotations = timeline_to_sigmf_annotations(
             events=load_timeline(args.timeline),
             rx_sample_rate=args.sample_rate,
+            rx_uhd_t0=rx_uhd_t0
         ),
     )
     logger.info(f"SigMF written: {data_path} and {meta_path}")

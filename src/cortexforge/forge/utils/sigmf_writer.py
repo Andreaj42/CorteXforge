@@ -1,18 +1,10 @@
 from datetime import datetime, timezone
 from json import dumps
 from pathlib import Path
-import hashlib
 
 from cortexforge.forge.utils.node_identity import get_node_name
+from cortexforge.forge.utils.sigmf.hash import _sha512_hex
 
-
-def _sha512_hex(path: Path, chunk_size: int = 1024 * 1024) -> str:
-    """Compute SHA-512 hash of a file and return it as a hex string."""
-    h = hashlib.sha512()
-    with path.open("rb") as f:
-        for chunk in iter(lambda: f.read(chunk_size), b""):
-            h.update(chunk)
-    return h.hexdigest()
 
 def write_sigmf(
     base_path: str,
@@ -27,7 +19,7 @@ def write_sigmf(
     author: str = "CorteXForge",
 ):
     """
-    base_path: path without extension, e.g. /.../out/noise_node6
+    base_path: path without extension
     data_file: existing IQ file path (fc32 raw)
     Creates:
       - base_path.sigmf-data
@@ -43,6 +35,7 @@ def write_sigmf(
     if data_src.resolve() != data_path.resolve():
         data_path.parent.mkdir(parents=True, exist_ok=True)
         data_src.replace(data_path)
+
 
     meta = {
         "global": {
@@ -61,8 +54,8 @@ def write_sigmf(
                 .replace("+00:00", "Z"),
                 "core:frequency": float(center_freq),
                 "core:sample_start": 0,
-                "cortexforge:node": get_node_name(),
                 "core:hw": hardware,
+                "cortexforge:node": get_node_name(),
                 "cortexforge:gain": gain,
                 "cortexforge:baseline": {
                     "sample_start": stat["skip_samples"],

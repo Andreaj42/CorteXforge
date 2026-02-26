@@ -26,8 +26,7 @@ def load_timeline(path: str) -> List[Dict[str, Any]]:
                 "amplitude": float(row["amplitude"]),
                 "modulation": row["modulation"],
                 "symbol_rate": float(row["symbol_rate"]),
-                "rolloff": float(row["rolloff"]),
-                "seed": int(row.get("seed", 0)),
+                "rolloff": float(row["rolloff"])
             }
             events.append(event)
 
