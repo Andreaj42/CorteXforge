@@ -16,13 +16,12 @@ def main(args):
     timeline_all = load_timeline(args.timeline)
     timeline = [ev for ev in timeline_all if ev.get("radio") == node_name]
 
-
     # Prepare I/Q burst
     events_with_iq = []
     for ev in timeline:
         iq = make_burst(
             modulation=ev["modulation"],
-            sample_rate=250000,
+            sample_rate=ev["sample_rate_sps"],
             symbol_rate=ev["symbol_rate"],
             duration_s=ev["duration_s"],
             rolloff=ev["rolloff"],
@@ -40,13 +39,13 @@ def main(args):
     
     tb = TxTimeline(
         usrp_args="",
-        rate=250000,
+        rate=events_with_iq[0]["sample_rate_sps"],
         center_freq=events_with_iq[0]["freq_hz"],
         gain=events_with_iq[0]["tx_gain_db"],
         events_with_iq=events_with_iq
     )
 
-    cfg = SyncConfig(server_host="mnode24", port_reg=5555, port_pub=5556)
+    cfg = SyncConfig(server_host=args.record_node, port_reg=5555, port_pub=5556)
     client = TxBarrierClient(cfg, node_name=node_name)
     client.register()
 

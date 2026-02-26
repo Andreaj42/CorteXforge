@@ -1,4 +1,7 @@
 from gnuradio import blocks, gr, uhd
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class RxRecorder(gr.top_block):
@@ -21,9 +24,18 @@ class RxRecorder(gr.top_block):
         self.src.set_time_source("external", self.rx_channel)
         self.src.set_samp_rate(rate)
         self.src.set_center_freq(freq, self.rx_channel)
-        self.src.set_rx_agc(False)
+        self._try_set_rx_agc(False)
+        #self.src.set_rx_agc(False)
         self.src.set_gain(gain, self.rx_channel)
         self.src.set_antenna("TX/RX", self.rx_channel)
-        self.sink = blocks.file_sink(gr.sizeof_float * 2, out_path, False)
+        self.sink = blocks.file_sink(gr.sizeof_gr_complex, out_path, False)
         self.sink.set_unbuffered(False)
         self.connect(self.src, self.sink)
+
+
+    def _try_set_rx_agc(self, enable: bool = False) -> None:
+        try:
+            self.src.set_rx_agc(enable)
+        except RuntimeError as e:
+            logger.warning("RX AGC not supported by this radio; msg: %s", str(e))
+                            

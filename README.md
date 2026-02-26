@@ -38,6 +38,9 @@ First, connect to the testbed:
 Next, book the testbed with your selected nodes (nodes: 5, 10, and 31 here) for the time of recording (increase the value):
 - ```oarsub -l {"network_address in ('mnode5.cortexlab.fr', 'mnode10.cortexlab.fr', 'mnode31.cortexlab.fr')"}/nodes=3,walltime=0:20:00 -r "2025-10-12 21:03:00"```
 
+To delete a job, use:
+- ```oardel job_id```
+
 And move the previously generated ```experiment``` folder into your **Cortexlab** home, then run:
 - ```minus task create experiment -f```
 - ```minus task submit experiment.task```
