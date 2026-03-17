@@ -25,7 +25,6 @@ class RxRecorder(gr.top_block):
         self.src.set_samp_rate(rate)
         self.src.set_center_freq(freq, self.rx_channel)
         self._try_set_rx_agc(False)
-        #self.src.set_rx_agc(False)
         self.src.set_gain(gain, self.rx_channel)
         self.src.set_antenna("TX/RX", self.rx_channel)
         self.sink = blocks.file_sink(gr.sizeof_gr_complex, out_path, False)
