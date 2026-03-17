@@ -8,87 +8,174 @@ class ExperimentScenario:
     """
     Generate a pseudo-random experiment schedule as a CSV.
 
-    The CSV has the following columns:
-    id, start_time, duration, modulation, tx_SNR, frequency, bandwidth
-
     Constraints:
-    - Signals start no earlier than warmup_time (default: 2 seconds).
+    - Signals start no earlier than warmup_time.
     - Signals must end before or at the total experiment duration.
-    - The receiver node and their params are fixed for the whole experiment.
+    - The receiver node and its params are fixed for the whole experiment.
     """
 
     def __init__(
         self,
         nodes: List[str],
-        duration: int,
-        rx_frequency: int,
+        duration: float,
         rx_sample_rate: int,
         warmup_time: float = 2.0,
     ):
+        if len(nodes) < 2:
+            raise ValueError("You must provide at least one RX node and one TX node.")
+
         if warmup_time >= duration:
             raise ValueError("warmup_time must be strictly less than total duration.")
 
         self.nodes = nodes
         self.duration = duration
-        self.rx_frequency = rx_frequency
         self.rx_sample_rate = rx_sample_rate
-
         self.warmup_time = warmup_time
         self.rx_node = nodes[0]
         self.tx_nodes = nodes[1:]
-        self.modulations = ["OOK", "BPSK", "QPSK", "8PSK", "16PSK", "32PSK", "16QAM", "32QAM", "64QAM", "128QAM", "256QAM"]
-        self.snr_range = (0.0, 30.0)
-        self.freq_range = (160, 6.6e6)
-        self.tx_frequency = rx_frequency
 
-    def generate_table(self) -> pd.DataFrame:
+        self.modulations = [
+            "OOK",
+            "BPSK",
+            "QPSK",
+            "8PSK",
+            "16PSK",
+            "32PSK",
+            "16QAM",
+            "32QAM",
+            "64QAM",
+            "128QAM",
+            "256QAM",
+        ]
+
+        self.duration_range_s = (0.002, 0.020)
+
+    @staticmethod
+    def _intervals_overlap(
+        start_a: float,
+        duration_a: float,
+        start_b: float,
+        duration_b: float,
+    ) -> bool:
+        end_a = start_a + duration_a
+        end_b = start_b + duration_b
+        return start_a < end_b and start_b < end_a
+
+    def _find_non_overlapping_start(
+        self,
+        signal_duration: float,
+        scheduled_intervals: List[tuple],
+        rng: random.Random,
+        max_attempts: int = 1000,
+    ) -> float:
+        latest_start = self.duration - signal_duration
+        if latest_start < self.warmup_time:
+            raise ValueError(
+                "Signal duration is too large for the available experiment window."
+            )
+
+        for _ in range(max_attempts):
+            candidate_start = round(rng.uniform(self.warmup_time, latest_start), 6)
+
+            has_overlap = any(
+                self._intervals_overlap(
+                    candidate_start,
+                    signal_duration,
+                    existing_start,
+                    existing_duration,
+                )
+                for existing_start, existing_duration in scheduled_intervals
+            )
+
+            if not has_overlap:
+                return candidate_start
+
+        raise RuntimeError(
+            "Unable to place a non-overlapping signal. "
+            "Try reducing n_signals, reducing signal durations, "
+            "or increasing the experiment duration."
+        )
+
+    def generate_table(
+        self,
+        n_signals: int = 100,
+        allow_overlap: bool = True,
+        seed: int | None = None,
+    ) -> pd.DataFrame:
         """
-        Generate a pandas DataFrame with the timeline columns.
+        Generate a pandas DataFrame with the experiment timeline.
+
+        Args:
+            n_signals: Number of signals to generate.
+            allow_overlap: If False, generated signals will not overlap in time.
+            seed: Optional seed for reproducibility.
         """
-        rng = random.Random()
+        rng = random.Random(seed)
 
         rows = []
-        for _ in range(0, 30):
+        scheduled_intervals = []
+
+        for _ in range(n_signals):
             signal_node = rng.choice(self.tx_nodes)
-            signal_duration = round(rng.uniform(0, 0.050), 6)
-            signal_start_time = round(
-                rng.uniform(self.warmup_time, self.duration - signal_duration), 6
-            )
+            signal_duration = round(rng.uniform(*self.duration_range_s), 6)
             signal_modulation = rng.choice(self.modulations)
-            signal_snr = int(rng.uniform(*self.snr_range))
-            signal_frequency = int(
-                rng.uniform(
-                    self.rx_frequency - self.rx_sample_rate / 2,
-                    self.rx_frequency + self.rx_sample_rate / 2,
+
+            if allow_overlap:
+                signal_start_time = round(
+                    rng.uniform(self.warmup_time, self.duration - signal_duration), 6
                 )
-            )
+            else:
+                signal_start_time = self._find_non_overlapping_start(
+                    signal_duration=signal_duration,
+                    scheduled_intervals=scheduled_intervals,
+                    rng=rng,
+                )
+                scheduled_intervals.append((signal_start_time, signal_duration))
+
             rows.append(
                 {
-                    "tx_node": signal_node,
+                    "radio": signal_node,
                     "start_time": signal_start_time,
-                    "duration": signal_duration,
+                    "duration_s": signal_duration,
                     "modulation": signal_modulation,
-                    "snr": signal_snr,
-                    "frequency": signal_frequency,
+                    "amplitude": 0.5,
+                    "roll_off": 0.35,
+                    "symbol_rate": 3_125_000,
+                    "sample_rate_sps": 25_000_000,
                 }
             )
+
         df = pd.DataFrame(
             rows,
             columns=[
-                "tx_node",
+                "radio",
                 "start_time",
-                "duration",
+                "duration_s",
                 "modulation",
-                "snr",
-                "frequency",
+                "amplitude",
+                "roll_off",
+                "symbol_rate",
+                "sample_rate_sps",
             ],
         )
+
+        df = df.sort_values("start_time").reset_index(drop=True)
         return df
 
-    def to_csv(self, output_path: str):
+    def to_csv(
+        self,
+        output_path: str,
+        n_signals: int = 100,
+        allow_overlap: bool = True,
+        seed: int | None = None,
+    ):
         """
         Generate the table and write it directly to a CSV file.
         """
-        df = self.generate_table()
+        df = self.generate_table(
+            n_signals=n_signals,
+            allow_overlap=allow_overlap,
+            seed=seed,
+        )
         df.index.name = "id"
         df.to_csv(output_path)

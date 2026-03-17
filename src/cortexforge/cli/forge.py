@@ -11,9 +11,7 @@ def build_parser() -> ArgumentParser:
     Returns:
         ArgumentParser: Configured argument parser instance with
     """
-    parser = ArgumentParser(
-        prog="CorteXForge forge", description="Dataset Generator"
-    )
+    parser = ArgumentParser(prog="CorteXForge forge", description="Dataset Generator")
     sub = parser.add_subparsers(
         dest="role",
         required=True,
@@ -22,15 +20,16 @@ def build_parser() -> ArgumentParser:
 
     rx = sub.add_parser("rx", help="Receiver mode")
     rx.add_argument(
-        "--frequency", type=int, required=True, help="Receiver center frequency (Hz)")
+        "--frequency", type=int, required=True, help="Receiver center frequency (Hz)"
+    )
     rx.add_argument(
-        "--sample-rate", type=int, required=True, help="Receiver sample rate (Sps)")
+        "--sample-rate", type=int, required=True, help="Receiver sample rate (Sps)"
+    )
+    rx.add_argument("--gain", type=int, required=True, help="Receiver gain (dB)")
     rx.add_argument(
-        "--gain", type=int, required=True, help="Receiver gain (dB)")
-    rx.add_argument(
-        "--duration", type=int, required=True, help="Capture duration (seconds)")
-    rx.add_argument(
-        "--timeline", type=Path, required=True, help="Path to timeline CSV")
+        "--duration", type=int, required=True, help="Capture duration (seconds)"
+    )
+    rx.add_argument("--timeline", type=Path, required=True, help="Path to timeline CSV")
     rx.add_argument(
         "--output-path",
         type=Path,
@@ -42,10 +41,14 @@ def build_parser() -> ArgumentParser:
     )
 
     tx = sub.add_parser("tx", help="Transmitter")
+    tx.add_argument("--timeline", type=Path, required=True, help="Path to timeline CSV")
     tx.add_argument(
-        "--timeline", type=Path, required=True, help="Path to timeline CSV")
+        "--record-node", type=str, required=True, help="Select the recorder node"
+    )
     tx.add_argument(
-        "--record-node", type=str, required=True, help="Select the recorder node")
+        "--frequency", type=int, required=True, help="Transmitter center frequency (Hz)"
+    )
+    tx.add_argument("--gain", type=int, required=True, help="Transmitter gain (dB)")
     return parser
 
 
