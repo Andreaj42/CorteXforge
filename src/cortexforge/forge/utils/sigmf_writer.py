@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
 from json import dumps
 from pathlib import Path
 
-from cortexforge.forge.utils.node_identity import get_node_name
-from cortexforge.forge.utils.sigmf.hash import _sha512_hex
+from cortexforge.forge.utils.sigmf.sigmf_annotations import make_sigmf_annotations
+from cortexforge.forge.utils.sigmf.sigmf_captures import make_sigmf_captures
+from cortexforge.forge.utils.sigmf.sigmf_global import make_sigmf_global
 
 
 def write_sigmf(
@@ -38,33 +38,19 @@ def write_sigmf(
 
 
     meta = {
-        "global": {
-            "core:author": author,
-            "core:description": description,
-            "core:recorder": "CorteXForge",
-            "core:datatype": "cf32_le",
-            "core:sample_rate": float(sample_rate),
-            "core:data_file": data_path.name,
-            "core:sha512": _sha512_hex(data_path),
-        },
-        "captures": [
-            {
-                "core:datetime": datetime.now(timezone.utc)
-                .isoformat()
-                .replace("+00:00", "Z"),
-                "core:frequency": float(center_freq),
-                "core:sample_start": 0,
-                "core:hw": hardware,
-                "cortexforge:node": get_node_name(),
-                "cortexforge:gain": gain,
-                "cortexforge:baseline": {
-                    "sample_start": stat["skip_samples"],
-                    "sample_count": stat["win_samples"],
-                    "power_dbfs": stat["power_dbfs"]
-                }
-            }
-        ],
-        "annotations": annotations,
+        "global": make_sigmf_global(
+            author=author,
+            sample_rate=sample_rate,
+            data_path=data_path,
+            description=description,
+        ),
+        "captures": make_sigmf_captures(
+            center_freq=center_freq,
+            gain=gain,
+            hardware=hardware,
+            stat=stat,
+        ),
+        "annotations": make_sigmf_annotations(annotations),
     }
 
     meta_path.parent.mkdir(parents=True, exist_ok=True)

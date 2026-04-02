@@ -2,6 +2,10 @@ from cortexforge.forge.utils.node_layout import distance
 from cortexforge.forge.utils.node_identity import get_node_name
 
 
+def make_sigmf_annotations(annotations):
+    return sorted(annotations, key=lambda a: a["core:sample_start"])
+
+
 def timeline_to_sigmf_annotations(events, rx_sample_rate, rx_uhd_t0):
     ann = []
     for ev in events:
@@ -27,5 +31,4 @@ def timeline_to_sigmf_annotations(events, rx_sample_rate, rx_uhd_t0):
             "cortexforge:rolloff": ev["rolloff"]
         })
 
-    ann.sort(key=lambda a: a["core:sample_start"])
-    return ann
+    return make_sigmf_annotations(ann)
