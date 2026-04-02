@@ -3,6 +3,7 @@ import pmt
 import math
 from gnuradio import gr, uhd
 
+
 class BurstScheduler(gr.sync_block):
     """
     Sort un flux complexe et place des tags UHD:
@@ -70,11 +71,11 @@ class BurstScheduler(gr.sync_block):
             space = n - produced
             k = min(remaining, space)
 
-            out[produced:produced+k] = iq[self.cur_pos:self.cur_pos+k]
+            out[produced : produced + k] = iq[self.cur_pos : self.cur_pos + k]
             self.cur_pos += k
             produced += k
 
-            # Dernier sample du burst -> tag EOB sur CE sample
+            # Dernier sample du burst -> tag EOB sur ce sample
             if self.cur_pos >= len(iq):
                 abs_off_last = self.nitems_written(0) + produced - 1
                 self._tag_flag(abs_off_last, "tx_eob")
@@ -82,8 +83,6 @@ class BurstScheduler(gr.sync_block):
                 self.cur_pos = 0
 
         return produced
-
-
 
 
 class TxTimeline(gr.top_block):
