@@ -34,31 +34,73 @@ def bits(rng, nbits: int) -> np.ndarray:
     return rng.integers(0, 2, size=nbits, dtype=np.int8)
 
 
+def _pam_gray_levels(nbits: int) -> np.ndarray:
+    levels = np.arange(-(2**nbits - 1), 2**nbits, 2, dtype=np.float32)
+    gray = np.arange(2**nbits, dtype=np.int32) ^ (np.arange(2**nbits, dtype=np.int32) >> 1)
+    return levels[gray]
+
+
+def _bits_to_int(bb: np.ndarray) -> np.ndarray:
+    weights = (1 << np.arange(bb.shape[1] - 1, -1, -1)).astype(np.int32)
+    return (bb.astype(np.int32) * weights).sum(axis=1)
+
+
+def _psk_symbols(b: np.ndarray, bits_per_symbol: int) -> np.ndarray:
+    idx = _bits_to_int(b.reshape(-1, bits_per_symbol))
+    phase = 2 * np.pi * idx / (2**bits_per_symbol)
+    return np.exp(1j * phase).astype(np.complex64)
+
+
+def _qam_symbols(b: np.ndarray, i_bits: int, q_bits: int) -> np.ndarray:
+    b = b.reshape(-1, i_bits + q_bits)
+    i_levels = _pam_gray_levels(i_bits)
+    q_levels = _pam_gray_levels(q_bits)
+    i = i_levels[_bits_to_int(b[:, :i_bits])]
+    q = q_levels[_bits_to_int(b[:, i_bits:])]
+    x = i + 1j * q
+    x /= np.sqrt(np.mean(np.abs(x) ** 2))
+    return x.astype(np.complex64)
+
+
+def _ask_symbols(b: np.ndarray, bits_per_symbol: int) -> np.ndarray:
+    if bits_per_symbol == 1:
+        return b.astype(np.complex64)
+
+    levels = _pam_gray_levels(bits_per_symbol)
+    x = levels[_bits_to_int(b.reshape(-1, bits_per_symbol))].astype(np.float32)
+    x /= np.sqrt(np.mean(np.abs(x) ** 2))
+    return x.astype(np.complex64)
+
+
 def map_symbols(mod: str, b: np.ndarray) -> np.ndarray:
+    mod = mod.upper()
+
+    if mod == "OOK":
+        return _ask_symbols(b, 1)
+    if mod == "4ASK":
+        return _ask_symbols(b, 2)
+    if mod == "8ASK":
+        return _ask_symbols(b, 3)
     if mod == "BPSK":
-        x = 2 * b.astype(np.float32) - 1.0
-        return x.astype(np.complex64)
+        return _psk_symbols(b, 1)
     if mod == "QPSK":
-        b = b.reshape(-1, 2)
-        i = 2 * b[:, 0].astype(np.float32) - 1.0
-        q = 2 * b[:, 1].astype(np.float32) - 1.0
-        return ((i + 1j * q) / np.sqrt(2)).astype(np.complex64)
+        return _psk_symbols(b, 2)
     if mod == "8PSK":
-        b = b.reshape(-1, 3)
-        idx = (b[:, 0] << 2) | (b[:, 1] << 1) | b[:, 2]
-        phase = 2 * np.pi * idx / 8.0
-        return np.exp(1j * phase).astype(np.complex64)
+        return _psk_symbols(b, 3)
+    if mod == "16PSK":
+        return _psk_symbols(b, 4)
+    if mod == "32PSK":
+        return _psk_symbols(b, 5)
     if mod == "16QAM":
-        b = b.reshape(-1, 4)
-
-        def lvl(bb0, bb1):
-            v = (bb0 << 1) | bb1
-            return np.array([-3, -1, 3, 1], dtype=np.float32)[v]
-
-        i = lvl(b[:, 0], b[:, 1])
-        q = lvl(b[:, 2], b[:, 3])
-        x = (i + 1j * q) / np.sqrt(10)  # normalize average power
-        return x.astype(np.complex64)
+        return _qam_symbols(b, 2, 2)
+    if mod == "32QAM":
+        return _qam_symbols(b, 3, 2)
+    if mod == "64QAM":
+        return _qam_symbols(b, 3, 3)
+    if mod == "128QAM":
+        return _qam_symbols(b, 4, 3)
+    if mod == "256QAM":
+        return _qam_symbols(b, 4, 4)
     raise ValueError(f"Unsupported modulation: {mod}")
 
 
@@ -71,6 +113,7 @@ def make_burst(
     amplitude: float,
     span_symbols: int = 11,
 ) -> np.ndarray:
+    modulation = modulation.upper()
     sps = int(round(sample_rate / symbol_rate))
     if sps < 2:
         raise ValueError(
@@ -81,7 +124,21 @@ def make_burst(
     nsyms = int(np.ceil(nsamp / sps))
 
     rng = np.random.default_rng()
-    bps = {"BPSK": 1, "QPSK": 2, "8PSK": 3, "16QAM": 4}[modulation.upper()]
+    bps = {
+        "OOK": 1,
+        "4ASK": 2,
+        "8ASK": 3,
+        "BPSK": 1,
+        "QPSK": 2,
+        "8PSK": 3,
+        "16PSK": 4,
+        "32PSK": 5,
+        "16QAM": 4,
+        "32QAM": 5,
+        "64QAM": 6,
+        "128QAM": 7,
+        "256QAM": 8,
+    }[modulation]
     b = bits(rng, nsyms * bps)
     syms = map_symbols(modulation, b)
 

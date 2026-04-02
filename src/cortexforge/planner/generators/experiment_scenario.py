@@ -36,6 +36,8 @@ class ExperimentScenario:
 
         self.modulations = [
             "OOK",
+            "4ASK",
+            "8ASK",
             "BPSK",
             "QPSK",
             "8PSK",
