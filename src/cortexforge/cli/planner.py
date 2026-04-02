@@ -11,10 +11,10 @@ def build_parser() -> ArgumentParser:
     Returns:
         ArgumentParser: Configured argument parser instance with
     """
-    parser = ArgumentParser(
-        prog="CorteXForge planner", description="Dataset Generator"
+    parser = ArgumentParser(prog="CorteXForge planner", description="Dataset Generator")
+    parser.add_argument(
+        "--username", required=True, type=str, help="username on CorteXlab"
     )
-    parser.add_argument("--username", type=str, help="username on CorteXlab")
     parser.add_argument(
         "--duration", type=int, default=60, help="Experiment duration in seconds"
     )
@@ -25,7 +25,11 @@ def build_parser() -> ArgumentParser:
     parser.add_argument(
         "--rx-sample-rate", type=int, default=250000, help="Receiver sample-rate"
     )
-
+    parser.add_argument(
+        "--overlapping",
+        action="store_true",
+        help="Allow overlapping signals in timeline",
+    )
     parser.add_argument(
         "--nodes-path",
         type=Path,
