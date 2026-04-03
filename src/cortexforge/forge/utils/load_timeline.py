@@ -17,17 +17,19 @@ def load_timeline(path: str) -> List[Dict[str, Any]]:
         reader = csv.DictReader(f)
         for row in reader:
             event = {
-                "radio": row.get("radio"),
-                "t_start_s": float(row["t_start_s"]),
+                "radio": row["radio"],
+                "t_start_s": float(row["start_time"]),
                 "duration_s": float(row["duration_s"]),
-                "freq_hz": int(row["freq_hz"]),
                 "sample_rate_sps": int(row["sample_rate_sps"]),
-                "tx_gain_db": float(row["tx_gain_db"]),
                 "amplitude": float(row["amplitude"]),
                 "modulation": row["modulation"],
                 "symbol_rate": float(row["symbol_rate"]),
-                "rolloff": float(row["rolloff"])
+                "rolloff": float(row["roll_off"]),
             }
+            if row.get("freq_hz") not in (None, ""):
+                event["freq_hz"] = int(row["freq_hz"])
+            if row.get("tx_gain_db") not in (None, ""):
+                event["tx_gain_db"] = float(row["tx_gain_db"])
             events.append(event)
 
     events.sort(key=lambda e: e["t_start_s"])
