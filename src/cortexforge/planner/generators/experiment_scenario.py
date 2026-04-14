@@ -35,6 +35,9 @@ class ExperimentScenario:
         self.tx_nodes = nodes[1:]
 
         self.modulations = [
+            "AM-DSB",
+            "AM-SSB",
+            "FM",
             "OOK",
             "4ASK",
             "8ASK",
