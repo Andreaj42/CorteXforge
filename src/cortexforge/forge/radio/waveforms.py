@@ -1,5 +1,10 @@
 import numpy as np
 
+MODULATION_ALIASES = {
+    "32QAM": "32QAM_RECT",
+    "128QAM": "128QAM_RECT",
+}
+
 
 def rrc_taps(beta: float, sps: int, span: int) -> np.ndarray:
     """
@@ -62,6 +67,45 @@ def _qam_symbols(b: np.ndarray, i_bits: int, q_bits: int) -> np.ndarray:
     return x.astype(np.complex64)
 
 
+def _cross_qam_constellation(grid_size: int, corner_levels_to_remove: int) -> np.ndarray:
+    # Cross-QAM: odd grid of size grid_size x grid_size with square corner blocks removed.
+    levels = np.arange(-(grid_size - 1), grid_size, 2, dtype=np.float32)
+    corner_threshold = grid_size - 2 * corner_levels_to_remove
+    constellation = np.array(
+        [
+            i + 1j * q
+            for q in levels
+            for i in levels
+            if not (abs(i) >= corner_threshold and abs(q) >= corner_threshold)
+        ],
+        dtype=np.complex64,
+    )
+    return constellation
+
+
+def _cross_qam_symbols(
+    b: np.ndarray,
+    bits_per_symbol: int,
+    grid_size: int,
+    corner_levels_to_remove: int,
+) -> np.ndarray:
+    b = b.reshape(-1, bits_per_symbol)
+    constellation = _cross_qam_constellation(grid_size, corner_levels_to_remove)
+
+    idx = _bits_to_int(b)
+    x = constellation[idx].astype(np.complex64)
+    x /= np.sqrt(np.mean(np.abs(x) ** 2))
+    return x.astype(np.complex64)
+
+
+def _cross_32qam_symbols(b: np.ndarray) -> np.ndarray:
+    return _cross_qam_symbols(b, bits_per_symbol=5, grid_size=6, corner_levels_to_remove=1)
+
+
+def _cross_128qam_symbols(b: np.ndarray) -> np.ndarray:
+    return _cross_qam_symbols(b, bits_per_symbol=7, grid_size=12, corner_levels_to_remove=2)
+
+
 def _ask_symbols(b: np.ndarray, bits_per_symbol: int) -> np.ndarray:
     if bits_per_symbol == 1:
         return b.astype(np.complex64)
@@ -73,7 +117,7 @@ def _ask_symbols(b: np.ndarray, bits_per_symbol: int) -> np.ndarray:
 
 
 def map_symbols(mod: str, b: np.ndarray) -> np.ndarray:
-    mod = mod.upper()
+    mod = MODULATION_ALIASES.get(mod.upper(), mod.upper())
 
     if mod == "OOK":
         return _ask_symbols(b, 1)
@@ -93,12 +137,16 @@ def map_symbols(mod: str, b: np.ndarray) -> np.ndarray:
         return _psk_symbols(b, 5)
     if mod == "16QAM":
         return _qam_symbols(b, 2, 2)
-    if mod == "32QAM":
+    if mod == "32QAM_RECT":
         return _qam_symbols(b, 3, 2)
+    if mod == "32QAM_CROSS":
+        return _cross_32qam_symbols(b)
     if mod == "64QAM":
         return _qam_symbols(b, 3, 3)
-    if mod == "128QAM":
+    if mod == "128QAM_RECT":
         return _qam_symbols(b, 4, 3)
+    if mod == "128QAM_CROSS":
+        return _cross_128qam_symbols(b)
     if mod == "256QAM":
         return _qam_symbols(b, 4, 4)
     raise ValueError(f"Unsupported modulation: {mod}")
@@ -113,7 +161,7 @@ def make_burst(
     amplitude: float,
     span_symbols: int = 11,
 ) -> np.ndarray:
-    modulation = modulation.upper()
+    modulation = MODULATION_ALIASES.get(modulation.upper(), modulation.upper())
     sps = int(round(sample_rate / symbol_rate))
     if sps < 2:
         raise ValueError(
@@ -134,9 +182,11 @@ def make_burst(
         "16PSK": 4,
         "32PSK": 5,
         "16QAM": 4,
-        "32QAM": 5,
+        "32QAM_RECT": 5,
+        "32QAM_CROSS": 5,
         "64QAM": 6,
-        "128QAM": 7,
+        "128QAM_RECT": 7,
+        "128QAM_CROSS": 7,
         "256QAM": 8,
     }[modulation]
     b = bits(rng, nsyms * bps)

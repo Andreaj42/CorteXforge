@@ -44,9 +44,11 @@ class ExperimentScenario:
             "16PSK",
             "32PSK",
             "16QAM",
-            "32QAM",
+            "32QAM_RECT",
+            "32QAM_CROSS",
             "64QAM",
-            "128QAM",
+            "128QAM_RECT",
+            "128QAM_CROSS",
             "256QAM",
         ]
 
