@@ -57,7 +57,6 @@ def timeline_to_sigmf_annotations(
             "cortexforge:amplitude": ev["amplitude"],
             "cortexforge:symbol_rate": ev["symbol_rate"],
             "cortexforge:rolloff": ev["rolloff"],
-            "cortexforge:theoretical_bw_hz": bw,
         })
 
     return make_sigmf_annotations(ann)
