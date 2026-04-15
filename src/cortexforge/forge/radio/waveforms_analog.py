@@ -1,6 +1,6 @@
 import numpy as np
 
-from cortexforge.forge.radio.waveform_numerique import rrc_taps
+from cortexforge.forge.radio.waveforms_numerique import rrc_taps
 
 
 def _analytic_signal(x: np.ndarray) -> np.ndarray:
