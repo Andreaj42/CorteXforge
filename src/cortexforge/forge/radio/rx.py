@@ -93,6 +93,8 @@ def main(args):
             rx_uhd_t0=rx_uhd_t0,
             tx_center_freq=args.frequency,
             tx_gain=args.gain,
+            rx_data_path=str(raw_path),
+            baseline_stat=stats,
         ),
     )
     logger.info(f"SigMF written: {data_path} and {meta_path}")
