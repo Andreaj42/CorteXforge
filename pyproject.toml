@@ -31,8 +31,7 @@ forge = [
 
 
 [project.scripts]
-cortexforge-planner = "cortexforge.planner.main:main"
-cortexforge-forge   = "cortexforge.forge.main:main"
+cortexforge = "cortexforge.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

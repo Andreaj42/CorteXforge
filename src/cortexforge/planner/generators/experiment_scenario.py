@@ -20,6 +20,7 @@ class ExperimentScenario:
         duration: float,
         rx_sample_rate: int,
         warmup_time: float = 2.0,
+        amplitude_range: tuple[float, float] = (0.01, 1.0),
     ):
         if len(nodes) < 2:
             raise ValueError("You must provide at least one RX node and one TX node.")
@@ -27,10 +28,15 @@ class ExperimentScenario:
         if warmup_time >= duration:
             raise ValueError("warmup_time must be strictly less than total duration.")
 
+        min_amplitude, max_amplitude = amplitude_range
+        if not (0.01 <= min_amplitude <= max_amplitude <= 1.0):
+            raise ValueError("amplitude_range must stay within [0.01, 1.0].")
+
         self.nodes = nodes
         self.duration = duration
         self.rx_sample_rate = rx_sample_rate
         self.warmup_time = warmup_time
+        self.amplitude_range = amplitude_range
         self.rx_node = nodes[0]
         self.tx_nodes = nodes[1:]
 
@@ -129,6 +135,7 @@ class ExperimentScenario:
             signal_node = rng.choice(self.tx_nodes)
             signal_duration = round(rng.uniform(*self.duration_range_s), 6)
             signal_modulation = rng.choice(self.modulations)
+            signal_amplitude = round(rng.uniform(*self.amplitude_range), 2)
 
             if allow_overlap:
                 signal_start_time = round(
@@ -148,7 +155,7 @@ class ExperimentScenario:
                     "start_time": signal_start_time,
                     "duration_s": signal_duration,
                     "modulation": signal_modulation,
-                    "amplitude": 0.5,
+                    "amplitude": signal_amplitude,
                     "roll_off": 0.35,
                     "symbol_rate": 3_125_000,
                     "sample_rate_sps": 25_000_000,

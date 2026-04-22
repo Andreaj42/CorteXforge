@@ -4,14 +4,8 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 
-def build_parser() -> ArgumentParser:
-    """
-    Build and configure the cli argument parser for CorteXForge forge.
-
-    Returns:
-        ArgumentParser: Configured argument parser instance with
-    """
-    parser = ArgumentParser(prog="CorteXForge forge", description="Dataset Generator")
+def configure_parser(parser: ArgumentParser) -> ArgumentParser:
+    """Attach forge-specific arguments to an existing parser."""
     sub = parser.add_subparsers(
         dest="role",
         required=True,
@@ -50,6 +44,12 @@ def build_parser() -> ArgumentParser:
     )
     tx.add_argument("--gain", type=int, required=True, help="Transmitter gain (dB)")
     return parser
+
+
+def build_parser() -> ArgumentParser:
+    """Build and configure the standalone forge parser."""
+    parser = ArgumentParser(prog="cortexforge forge", description="Dataset Generator")
+    return configure_parser(parser)
 
 
 def parse_args(argv: list[str] | None = None) -> Namespace:

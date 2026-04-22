@@ -14,4 +14,4 @@ The scenario generator can be executed locally before  deployment in Slices/Cort
 - ```python3.13 -m venv .venv```
 - ```source .venv/bin/activate```
 - ```pip install -e .```
-- ```cortexforge-planner```
+- ```cortexforge planner```

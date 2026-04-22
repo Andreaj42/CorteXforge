@@ -4,14 +4,8 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 
-def build_parser() -> ArgumentParser:
-    """
-    Build and configure the cli argument parser for CorteXForge planner.
-
-    Returns:
-        ArgumentParser: Configured argument parser instance with
-    """
-    parser = ArgumentParser(prog="CorteXForge planner", description="Dataset Generator")
+def configure_parser(parser: ArgumentParser) -> ArgumentParser:
+    """Attach planner-specific arguments to an existing parser."""
     parser.add_argument(
         "--username", required=True, type=str, help="username on CorteXlab"
     )
@@ -37,6 +31,12 @@ def build_parser() -> ArgumentParser:
         help="Path to nodes.yaml file",
     )
     return parser
+
+
+def build_parser() -> ArgumentParser:
+    """Build and configure the standalone planner parser."""
+    parser = ArgumentParser(prog="cortexforge planner", description="Dataset Generator")
+    return configure_parser(parser)
 
 
 def parse_args(argv: list[str] | None = None) -> Namespace:

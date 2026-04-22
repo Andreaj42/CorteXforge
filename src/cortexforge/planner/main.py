@@ -9,9 +9,8 @@ from cortexforge.utils.logger import setup_logger
 logger = setup_logger()
 
 
-def main() -> None:
+def run(args) -> None:
     logger.info("Starting scenario generation...")
-    args = parse_args()
     nodes = load_nodes(args.nodes_path)
 
     scenario = ExperimentScenario(
@@ -32,7 +31,7 @@ def main() -> None:
         duration=args.duration + 30,
         image="ghcr.io/andreaj42/cortexforge:latest",
         rx_command=(
-            f'bash -lc "cortexforge-forge rx '
+            f'bash -lc "cortexforge forge rx '
             f"--duration {args.duration} "
             f"--frequency {args.rx_frequency} "
             f"--gain {args.rx_gain} "
@@ -41,7 +40,7 @@ def main() -> None:
             f'--timeline /cortexlab/homes/{args.username}/timeline.csv"'
         ),
         tx_command=(
-            f'bash -lc "cortexforge-forge tx '
+            f'bash -lc "cortexforge forge tx '
             f"--timeline /cortexlab/homes/{args.username}/timeline.csv "
             f"--record-node {nodes[0]} "
             f"--frequency {args.rx_frequency} "
@@ -51,6 +50,10 @@ def main() -> None:
         output_path="configs/scenario.yaml",
     )
     logger.info("Scenario generation completed.")
+
+
+def main(argv: list[str] | None = None) -> None:
+    run(parse_args(argv))
 
 
 if __name__ == "__main__":

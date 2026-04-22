@@ -1,13 +1,14 @@
 # CorteXForge
-This project is a framework designed to automate the generation and execution of radio dataset experiments on the [Slices/CorteXlab](https://www.cortexlab.fr/doku.php?id=start) testbed.
+This project is a framework designed to automate the generation and execution of radio dataset experiments on the [SLICES-RI/CorteXlab](https://www.cortexlab.fr/doku.php?id=start) testbed.
 It relies on the [GNU Radio](https://www.gnuradio.org) environment to record labeled transmissions of various signals.
 
 ## Overview
-This project is organized into two main components:
+This project is organized into three main components:
 - Scenario generation: this part produces configuration files describing the experiment setup. It creates: 
   - a `scenario.yaml` file defining which nodes will be used on CorteXlab;
   - an `timeline.csv` file orchestrating the role and sequence of these nodes.
-- Experiment execution: this part deploys and executes the generates experiment definitions (`timeline.csv`) directly on the [Slices/CorteXlab](https://www.cortexlab.fr/doku.php?id=start) nodes.
+- Experiment execution: this part deploys and executes the generates experiment definitions (`timeline.csv`) directly on the [SLICES-RI/CorteXlab](https://www.cortexlab.fr/doku.php?id=start) nodes.
+- Dataset API
 
 ## Quick start (User Guide) :rocket:
 
@@ -21,7 +22,7 @@ The scenario generator can be executed locally before  deployment in Slices/Cort
 ### Example usage
 - ```git clone https://github.com/Andreaj42/CorteXForge.git```
 - ```python3.13 -m venv .venv```
-- ```source .venv/bin/activate```
+- ```. .venv/bin/activate```
 - ```pip install -e .[planner]```
 - ```cortexforge-planner --nodes-path confis/nodes.yaml --duration 600 --output-path my/path/on/cortexlab```
 
@@ -48,12 +49,6 @@ And move the previously generated ```experiment``` folder into your **Cortexlab*
 To monitor your experiment, use: 
 - ```minus testbed status```
 - ```minus log -d```
-
-## Developer Guide :hammer_and_wrench:
-
-Now clone the project:
-- ```git clone https://github.com/Andreaj42/CorteXForge.git```
-- ```cd forge```
 
 
 ### Docker Images :whale:

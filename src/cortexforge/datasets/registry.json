@@ -1,0 +1,15 @@
+{
+  "awgn_single": {
+    "latest": "1.0.0",
+    "versions": {
+      "1.0.0": {
+        "url": "https://cortexforge.andrea-joly.fr/awgn_single-1.0.0.tar.zst",
+        "archive_name": "awgn_single-1.0.0.tar.zst",
+        "root_dir": "awgn_single/1.0.0",
+        "sha256": "99bce62ba6874ce6a5e135431caa43d22572c6879f357d6cbbc2df97d0ca3f41",
+        "size_bytes": 1591992964,
+        "description": "Single dataset in SigMF format"
+      }
+    }
+  }
+}

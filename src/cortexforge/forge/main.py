@@ -4,8 +4,7 @@ from cortexforge.utils.logger import setup_logger
 logger = setup_logger()
 
 
-def main() -> None:
-    args = parse_args()
+def run(args) -> None:
     logger.info("Starting CorteXForge...")
     logger.info(f"Args={args}")
 
@@ -19,6 +18,10 @@ def main() -> None:
         tx_main(args)
     else:
         raise ValueError(f"Unknown role: {args.role}")
+
+
+def main(argv: list[str] | None = None) -> None:
+    run(parse_args(argv))
 
 
 if __name__ == "__main__":
