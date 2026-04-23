@@ -20,10 +20,12 @@ def build_parser() -> ArgumentParser:
         sub.add_parser("planner", help="Generate scenarios and experiment files")
     )
     configure_forge_parser(
-        sub.add_parser("forge", help="Run transmitter or receiver commands")
+        sub.add_parser(
+            "forge", help="Run transmitter or receiver commands on CorteXlab"
+        )
     )
     configure_datasets_parser(
-        sub.add_parser("datasets", help="Inspect locally available datasets")
+        sub.add_parser("datasets", help="Inspect available datasets")
     )
     return parser
 

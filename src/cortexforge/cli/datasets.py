@@ -21,13 +21,6 @@ def configure_parser(parser: ArgumentParser) -> ArgumentParser:
 
     sub.add_parser("list", help="List available datasets and their versions")
 
-    versions = sub.add_parser("versions", help="List available versions for a dataset")
-    versions.add_argument("name", type=str, help="Dataset name")
-
-    describe = sub.add_parser("describe", help="Show a dataset manifest")
-    describe.add_argument("name", type=str, help="Dataset name")
-    describe.add_argument("version", type=str, help="Dataset version")
-
     download = sub.add_parser(
         "download",
         help="Download and extract a dataset version from the embedded registry",
@@ -52,7 +45,7 @@ def build_parser() -> ArgumentParser:
     """Build and configure the standalone datasets parser."""
     parser = ArgumentParser(
         prog="cortexforge datasets",
-        description="Inspect locally available datasets",
+        description="Inspect available datasets",
     )
     return configure_parser(parser)
 

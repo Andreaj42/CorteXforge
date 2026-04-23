@@ -2,10 +2,8 @@ from pathlib import Path
 
 from cortexforge.cli.datasets import parse_args
 from cortexforge.datasets import (
-    describe_dataset,
     download_dataset,
     list_registry_datasets,
-    list_versions,
 )
 from cortexforge.utils.logger import setup_logger
 
@@ -43,7 +41,7 @@ def _render_catalog(root: Path) -> str:
         lines.append(
             "\n".join(
                 [
-                    f"- {dataset['name']}",
+                    f"- Name        : {dataset['name']}",
                     f"  Description : {description}",
                     f"  Latest      : {dataset['latest']}",
                     f"  Versions    : {versions}",
@@ -59,29 +57,6 @@ def _render_catalog(root: Path) -> str:
 def run(args) -> None:
     if args.datasets_command == "list":
         logger.info(_render_catalog(Path(args.root)))
-        return
-
-    if args.datasets_command == "versions":
-        versions = list_versions(args.name, args.root)
-        datasets = list_registry_datasets(args.root)
-        description = next(
-            (dataset["description"] for dataset in datasets if dataset["name"] == args.name),
-            "",
-        )
-        lines = [
-            f"Dataset: {args.name}",
-            f"Description: {description or 'No description provided.'}",
-            f"Versions: {', '.join(versions) if versions else '-'}",
-        ]
-        logger.info("\n".join(lines))
-        return
-
-    if args.datasets_command == "describe":
-        manifest = describe_dataset(args.name, args.version, args.root)
-        from dataclasses import asdict
-        import json
-
-        logger.info(json.dumps(asdict(manifest), indent=2, sort_keys=True))
         return
 
     if args.datasets_command == "download":
