@@ -3,6 +3,8 @@ from typing import List
 
 import pandas as pd
 
+from cortexforge.planner.modulations import DEFAULT_MODULATIONS
+
 
 class ExperimentScenario:
     """
@@ -11,6 +13,8 @@ class ExperimentScenario:
     Constraints:
     - Signals start no earlier than warmup_time.
     - Signals must end before or at the total experiment duration.
+    - Non-overlapping signals are separated by min_burst_gap_s.
+    - Modulations are evenly distributed across generated signals.
     - The receiver node and its params are fixed for the whole experiment.
     """
 
@@ -20,7 +24,9 @@ class ExperimentScenario:
         duration: float,
         rx_sample_rate: int,
         warmup_time: float = 2.0,
-        amplitude_range: tuple[float, float] = (0.01, 1.0),
+        amplitude_range: tuple[float, float] = (0.05, 0.3),
+        modulations: List[str] | None = None,
+        min_burst_gap_s: float = 0.010,
     ):
         if len(nodes) < 2:
             raise ValueError("You must provide at least one RX node and one TX node.")
@@ -32,39 +38,42 @@ class ExperimentScenario:
         if not (0.01 <= min_amplitude <= max_amplitude <= 1.0):
             raise ValueError("amplitude_range must stay within [0.01, 1.0].")
 
+        if min_burst_gap_s < 0:
+            raise ValueError("min_burst_gap_s must be greater than or equal to 0.")
+
         self.nodes = nodes
         self.duration = duration
         self.rx_sample_rate = rx_sample_rate
         self.warmup_time = warmup_time
         self.amplitude_range = amplitude_range
+        self.min_burst_gap_s = min_burst_gap_s
         self.rx_node = nodes[0]
         self.tx_nodes = nodes[1:]
 
-        self.modulations = [
-            "AM-DSB",
-            "AM-SSB",
-            "FM",
-            "OOK",
-            "PAM4",
-            "4ASK",
-            "8ASK",
-            "BPSK",
-            "QPSK",
-            "8PSK",
-            "16PSK",
-            "32PSK",
-            "CPFSK",
-            "GFSK",
-            "16QAM",
-            "32QAM_RECT",
-            "32QAM_CROSS",
-            "64QAM",
-            "128QAM_RECT",
-            "128QAM_CROSS",
-            "256QAM",
-        ]
+        selected_modulations = (
+            DEFAULT_MODULATIONS if modulations is None else modulations
+        )
+        self.modulations = self._validate_modulations(selected_modulations)
 
-        self.duration_range_s = (0.002, 0.020)
+        self.duration_range_s = (0.02, 0.10)
+
+    @staticmethod
+    def _validate_modulations(modulations: List[str]) -> List[str]:
+        if not modulations:
+            raise ValueError("At least one modulation must be provided.")
+
+        normalized = list(
+            dict.fromkeys(modulation.upper() for modulation in modulations)
+        )
+        unknown = sorted(set(normalized) - set(DEFAULT_MODULATIONS))
+        if unknown:
+            supported = ", ".join(DEFAULT_MODULATIONS)
+            raise ValueError(
+                f"Unsupported planner modulation(s): {', '.join(unknown)}. "
+                f"Supported modulations are: {supported}"
+            )
+
+        return normalized
 
     @staticmethod
     def _intervals_overlap(
@@ -72,10 +81,11 @@ class ExperimentScenario:
         duration_a: float,
         start_b: float,
         duration_b: float,
+        min_gap_s: float = 0.0,
     ) -> bool:
         end_a = start_a + duration_a
         end_b = start_b + duration_b
-        return start_a < end_b and start_b < end_a
+        return start_a < end_b + min_gap_s and start_b < end_a + min_gap_s
 
     def _find_non_overlapping_start(
         self,
@@ -99,6 +109,7 @@ class ExperimentScenario:
                     signal_duration,
                     existing_start,
                     existing_duration,
+                    self.min_burst_gap_s,
                 )
                 for existing_start, existing_duration in scheduled_intervals
             )
@@ -109,32 +120,55 @@ class ExperimentScenario:
         raise RuntimeError(
             "Unable to place a non-overlapping signal. "
             "Try reducing n_signals, reducing signal durations, "
-            "or increasing the experiment duration."
+            "reducing min_burst_gap_s, or increasing the experiment duration."
         )
+
+    def _balanced_modulation_sequence(
+        self,
+        n_signals: int,
+        rng: random.Random,
+    ) -> list[str]:
+        if n_signals <= 0:
+            raise ValueError("n_signals must be strictly positive.")
+
+        n_modulations = len(self.modulations)
+        if n_signals % n_modulations != 0:
+            raise ValueError(
+                "n_signals must be a multiple of the number of selected "
+                f"modulations ({n_modulations}) to keep a balanced distribution."
+            )
+
+        repetitions = n_signals // n_modulations
+        signal_modulations = self.modulations * repetitions
+        rng.shuffle(signal_modulations)
+        return signal_modulations
 
     def generate_table(
         self,
-        n_signals: int = 100,
-        allow_overlap: bool = True,
+        n_signals: int = 288,
+        allow_overlap: bool = False,
         seed: int | None = None,
     ) -> pd.DataFrame:
         """
         Generate a pandas DataFrame with the experiment timeline.
 
         Args:
-            n_signals: Number of signals to generate.
-            allow_overlap: If False, generated signals will not overlap in time.
+            n_signals: Number of signals to generate. Must be a multiple of the
+                selected modulation count.
+            allow_overlap: If False, generated signals will not overlap and will
+                keep at least min_burst_gap_s between bursts.
             seed: Optional seed for reproducibility.
         """
         rng = random.Random(seed)
 
+        signal_modulations = self._balanced_modulation_sequence(n_signals, rng)
+
         rows = []
         scheduled_intervals = []
 
-        for _ in range(n_signals):
+        for signal_modulation in signal_modulations:
             signal_node = rng.choice(self.tx_nodes)
             signal_duration = round(rng.uniform(*self.duration_range_s), 6)
-            signal_modulation = rng.choice(self.modulations)
             signal_amplitude = round(rng.uniform(*self.amplitude_range), 2)
 
             if allow_overlap:
@@ -182,8 +216,8 @@ class ExperimentScenario:
     def to_csv(
         self,
         output_path: str,
-        n_signals: int = 100,
-        allow_overlap: bool = True,
+        n_signals: int = 288,
+        allow_overlap: bool = False,
         seed: int | None = None,
     ):
         """

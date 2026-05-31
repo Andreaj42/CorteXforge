@@ -17,13 +17,19 @@ def run(args) -> None:
         nodes=nodes,
         duration=args.duration,
         rx_sample_rate=args.rx_sample_rate,
+        modulations=args.modulations,
     )
 
-    df = scenario.generate_table(n_signals=100, allow_overlap=args.overlapping, seed=42)
+    df = scenario.generate_table(
+        n_signals=args.n_signals, allow_overlap=args.overlapping, seed=42
+    )
     print(df.head())
 
     scenario.to_csv(
-        "configs/timeline.csv", n_signals=100, allow_overlap=args.overlapping, seed=42
+        "configs/timeline.csv",
+        n_signals=args.n_signals,
+        allow_overlap=args.overlapping,
+        seed=42,
     )
 
     generate_cortexlab_scenario(
