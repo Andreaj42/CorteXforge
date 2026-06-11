@@ -5,9 +5,20 @@ MODULATION_ALIASES = {
     "32QAM": "32QAM_RECT",
     "128QAM": "128QAM_RECT",
     "4PAM": "PAM4",
+    "AM-DSB-WC": "AM-DSB-WC",
+    "AM-DSB-SC": "AM-DSB-SC",
+    "AM-SSB-WC": "AM-SSB-WC",
+    "AM-SSB-SC": "AM-SSB",
 }
 
-ANALOG_MODULATIONS = {"AM-DSB", "AM-SSB", "FM"}
+ANALOG_MODULATIONS = {
+    "AM-DSB",
+    "AM-DSB-WC",
+    "AM-DSB-SC",
+    "AM-SSB",
+    "AM-SSB-WC",
+    "FM",
+}
 
 
 def make_burst(

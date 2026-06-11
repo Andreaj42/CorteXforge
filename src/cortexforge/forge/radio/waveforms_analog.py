@@ -66,14 +66,23 @@ def make_analog_burst(
         span_symbols=span_symbols,
     )
 
-    if modulation == "AM-DSB":
+    if modulation in {"AM-DSB", "AM-DSB-WC"}:
         carrier_leak = 0.5
         burst = (carrier_leak + 0.5 * msg).astype(np.complex64)
+    elif modulation == "AM-DSB-SC":
+        burst = msg.astype(np.complex64)
     elif modulation == "AM-SSB":
         burst = _analytic_signal(msg)
         peak = np.max(np.abs(burst))
         if peak > 0:
             burst /= peak
+    elif modulation == "AM-SSB-WC":
+        carrier_leak = 0.5
+        burst = _analytic_signal(msg)
+        peak = np.max(np.abs(burst))
+        if peak > 0:
+            burst /= peak
+        burst = (carrier_leak + 0.5 * burst).astype(np.complex64)
     elif modulation == "FM":
         freq_dev_hz = min(symbol_rate * 0.25, sample_rate * 0.20)
         phase = 2 * np.pi * freq_dev_hz * np.cumsum(msg, dtype=np.float64) / sample_rate

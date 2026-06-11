@@ -17,7 +17,7 @@ def theoretical_bandwidth_hz(ev):
     # Default occupied RF bandwidth.
     bw = (1.0 + rolloff) * symbol_rate
 
-    if modulation == "AM-SSB":
+    if modulation in {"AM-SSB", "AM-SSB-WC", "AM-SSB-SC"}:
         return 0.5 * bw
     # Règle de Carson
     if modulation == "FM":
@@ -45,7 +45,7 @@ def timeline_to_sigmf_annotations(
         bw = theoretical_bandwidth_hz(ev)
         f0 = tx_center_freq
 
-        if modulation == "AM-SSB":
+        if modulation in {"AM-SSB", "AM-SSB-WC", "AM-SSB-SC"}:
             f_low = f0
             f_high = f0 + bw
         else:

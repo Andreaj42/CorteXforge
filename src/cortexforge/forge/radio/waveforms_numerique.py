@@ -100,6 +100,23 @@ def _cross_128qam_symbols(b: np.ndarray) -> np.ndarray:
     return _cross_qam_symbols(b, bits_per_symbol=7, grid_size=12, corner_levels_to_remove=2)
 
 
+def _apsk_symbols(b: np.ndarray, ring_counts: tuple[int, ...]) -> np.ndarray:
+    b = b.reshape(-1, int(np.log2(sum(ring_counts))))
+    idx = _bits_to_int(b)
+
+    points = []
+    for ring_idx, ring_size in enumerate(ring_counts):
+        radius = float(ring_idx + 1)
+        phase_offset = (np.pi / ring_size) if ring_idx % 2 else 0.0
+        phase = 2 * np.pi * np.arange(ring_size, dtype=np.float32) / ring_size
+        points.extend(radius * np.exp(1j * (phase + phase_offset)))
+
+    constellation = np.array(points, dtype=np.complex64)
+    x = constellation[idx].astype(np.complex64)
+    x /= np.sqrt(np.mean(np.abs(x) ** 2))
+    return x.astype(np.complex64)
+
+
 def _ask_symbols(b: np.ndarray, bits_per_symbol: int) -> np.ndarray:
     if bits_per_symbol == 1:
         return b.astype(np.complex64)
@@ -161,12 +178,22 @@ def map_symbols(mod: str, b: np.ndarray) -> np.ndarray:
         return _psk_symbols(b, 1)
     if mod == "QPSK":
         return _psk_symbols(b, 2)
+    if mod == "OQPSK":
+        return _psk_symbols(b, 2)
     if mod == "8PSK":
         return _psk_symbols(b, 3)
     if mod == "16PSK":
         return _psk_symbols(b, 4)
     if mod == "32PSK":
         return _psk_symbols(b, 5)
+    if mod == "16APSK":
+        return _apsk_symbols(b, (4, 12))
+    if mod == "32APSK":
+        return _apsk_symbols(b, (4, 12, 16))
+    if mod == "64APSK":
+        return _apsk_symbols(b, (4, 12, 20, 28))
+    if mod == "128APSK":
+        return _apsk_symbols(b, (8, 16, 24, 32, 48))
     if mod == "16QAM":
         return _qam_symbols(b, 2, 2)
     if mod == "32QAM_RECT":
@@ -203,10 +230,10 @@ def make_digital_burst(
     nsyms = int(np.ceil(nsamp / sps))
 
     rng = np.random.default_rng()
-    if modulation in {"CPFSK", "GFSK"}:
+    if modulation in {"CPFSK", "GFSK", "GMSK"}:
         b = bits(rng, nsyms)
         symbols = (2 * b.astype(np.float32)) - 1.0
-        gaussian_bt = 0.35 if modulation == "GFSK" else None
+        gaussian_bt = {"GFSK": 0.35, "GMSK": 0.3}.get(modulation)
         return _cpfsk_like_burst(
             symbols=symbols,
             sps=sps,
@@ -223,9 +250,14 @@ def make_digital_burst(
         "8ASK": 3,
         "BPSK": 1,
         "QPSK": 2,
+        "OQPSK": 2,
         "8PSK": 3,
         "16PSK": 4,
         "32PSK": 5,
+        "16APSK": 4,
+        "32APSK": 5,
+        "64APSK": 6,
+        "128APSK": 7,
         "16QAM": 4,
         "32QAM_RECT": 5,
         "32QAM_CROSS": 5,
@@ -236,6 +268,21 @@ def make_digital_burst(
     }[modulation]
     b = bits(rng, nsyms * bps)
     syms = map_symbols(modulation, b)
+
+    if modulation == "OQPSK":
+        syms = syms.copy()
+        half_symbol = max(1, sps // 2)
+        i_up = np.zeros(nsyms * sps + half_symbol, dtype=np.complex64)
+        q_up = np.zeros(nsyms * sps + half_symbol, dtype=np.complex64)
+        i_up[: nsyms * sps : sps] = np.real(syms).astype(np.float32)
+        q_up[half_symbol : half_symbol + nsyms * sps : sps] = (
+            1j * np.imag(syms).astype(np.float32)
+        )
+        taps = rrc_taps(rolloff, sps, span_symbols)
+        shaped = np.convolve(i_up + q_up, taps.astype(np.complex64), mode="same")
+        burst = shaped[:nsamp]
+        burst *= float(amplitude)
+        return burst.astype(np.complex64)
 
     up = np.zeros(nsyms * sps, dtype=np.complex64)
     up[::sps] = syms

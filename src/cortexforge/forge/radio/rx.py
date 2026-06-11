@@ -67,6 +67,9 @@ def main(args):
     tb.stop()
     tb.wait()
 
+    expected_size = int(args.duration * args.sample_rate) * 8
+    actual_size = raw_path.stat().st_size
+
     stats = compute_baseline(
         path=str(raw_path),
         sample_rate=args.sample_rate
@@ -98,3 +101,5 @@ def main(args):
         ),
     )
     logger.info(f"SigMF written: {data_path} and {meta_path}")
+    logger.info("Expected size: %d", expected_size)
+    logger.info("Actual size: %d", actual_size)
