@@ -19,8 +19,8 @@
         "url": "https://cortexforge.andrea-joly.fr/modforge-1.0.0.tar.zst",
         "archive_name": "modforge-1.0.0.tar.zst",
         "root_dir": "modforge/1.0.0",
-        "sha256": "183ed029f22681265eed2d4eee6a805f33b753976018b635b07ae89b04387a90",
-        "size_bytes": 4017257506,
+        "sha256": "d15a6152feb74ac04fd1e92a59b8f2406ba5fb6a430134bd2b82d73be4a3da1f",
+        "size_bytes": 4017286476,
         "description": "Modulation dataset stored in HDF5 format."
       }
     }
