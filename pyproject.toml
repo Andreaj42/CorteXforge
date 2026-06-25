@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cortexforge"
-version = "0.1.4"
+version = "0.1.5"
 description = "RF generator dataset based on SLICES/CorteXlab"
 authors = [
   { name = "Andrea Joly", email = "andrea.joly@inria.fr" }
-]
+] 
 requires-python = ">=3.10"
 dependencies = [
 
