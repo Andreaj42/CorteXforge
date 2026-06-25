@@ -24,7 +24,7 @@ class ExperimentScenario:
         duration: float,
         rx_sample_rate: int,
         warmup_time: float = 2.0,
-        amplitude_range: tuple[float, float] = (0.05, 0.3),
+        amplitude_range: tuple[float, float] = (0.05, 0.2),
         modulations: List[str] | None = None,
         min_burst_gap_s: float = 0.010,
     ):
@@ -191,8 +191,8 @@ class ExperimentScenario:
                     "modulation": signal_modulation,
                     "amplitude": signal_amplitude,
                     "roll_off": 0.35,
-                    "symbol_rate": 3_125_000,
-                    "sample_rate_sps": 25_000_000,
+                    "symbol_rate": 2_500_000,
+                    "sample_rate_sps": 10_000_000,
                 }
             )
 

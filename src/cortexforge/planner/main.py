@@ -18,6 +18,7 @@ def run(args) -> None:
         duration=args.duration,
         rx_sample_rate=args.rx_sample_rate,
         modulations=args.modulations,
+        warmup_time=2.0,
     )
 
     df = scenario.generate_table(
