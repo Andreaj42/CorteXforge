@@ -36,7 +36,6 @@ def write_sigmf(
         data_path.parent.mkdir(parents=True, exist_ok=True)
         data_src.replace(data_path)
 
-
     meta = {
         "global": make_sigmf_global(
             author=author,

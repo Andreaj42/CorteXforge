@@ -31,10 +31,8 @@ class RxRecorder(gr.top_block):
         self.sink.set_unbuffered(False)
         self.connect(self.src, self.sink)
 
-
     def _try_set_rx_agc(self, enable: bool = False) -> None:
         try:
             self.src.set_rx_agc(enable)
         except RuntimeError as e:
             logger.warning("RX AGC not supported by this radio; msg: %s", str(e))
-                            

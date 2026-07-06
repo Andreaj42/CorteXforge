@@ -1,5 +1,5 @@
-# CorteXForge
-This project is a framework designed to automate the generation and execution of radio dataset experiments on the [SLICES-RI/CorteXlab](https://www.cortexlab.fr/doku.php?id=start) testbed.
+# CorteXforge
+CorteXforge is an end-to-end framework designed to automate the generation and execution of radio dataset experiments on the [SLICES-RI/CorteXlab](https://www.cortexlab.fr/doku.php?id=start) testbed.
 It relies on the [GNU Radio](https://www.gnuradio.org) environment to record labeled transmissions of various signals.
 
 ## Overview
@@ -26,7 +26,7 @@ The scenario generator can be executed locally before  deployment in Slices/Cort
 - ```pip install -e .[planner]```
 - ```cortexforge-planner --nodes-path confis/nodes.yaml --duration 600 --output-path my/path/on/cortexlab```
 
-### 2. Forge
+### 2. Forge (Experiment Execution)
 :warning: This part must be executed directly on the Slices/CorteXlab testbed !
 
 Each nodes defined before in the previous stage will run a GNU Radio flowgraph according to the configuration.
@@ -50,6 +50,31 @@ To monitor your experiment, use:
 - ```minus testbed status```
 - ```minus log -d```
 
+
+### 3. Pre-generated Datasets
+
+Just want to use a dataset without running your own experiments? Simply download one of the pre-generated datasets produced with CorteXforge.
+
+First, install the dataset API:
+
+```bash
+pip install cortexforge
+```
+
+List all available datasets:
+```bash
+cortexforge datasets list
+```
+
+Download a dataset
+```bash
+cortexforge datasets download <dataset_name>
+```
+
+For example:
+```bash
+cortexforge datasets download modfore
+```
 
 ### Docker Images :whale:
 To simplify deployment and ensure reproductibility, we generated a Docker image.

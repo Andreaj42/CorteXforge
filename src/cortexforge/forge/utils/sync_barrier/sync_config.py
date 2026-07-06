@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class SyncConfig:
     server_host: str

@@ -36,7 +36,9 @@ def bits(rng, nbits: int) -> np.ndarray:
 
 def _pam_gray_levels(nbits: int) -> np.ndarray:
     levels = np.arange(-(2**nbits - 1), 2**nbits, 2, dtype=np.float32)
-    gray = np.arange(2**nbits, dtype=np.int32) ^ (np.arange(2**nbits, dtype=np.int32) >> 1)
+    gray = np.arange(2**nbits, dtype=np.int32) ^ (
+        np.arange(2**nbits, dtype=np.int32) >> 1
+    )
     return levels[gray]
 
 
@@ -62,7 +64,9 @@ def _qam_symbols(b: np.ndarray, i_bits: int, q_bits: int) -> np.ndarray:
     return x.astype(np.complex64)
 
 
-def _cross_qam_constellation(grid_size: int, corner_levels_to_remove: int) -> np.ndarray:
+def _cross_qam_constellation(
+    grid_size: int, corner_levels_to_remove: int
+) -> np.ndarray:
     levels = np.arange(-(grid_size - 1), grid_size, 2, dtype=np.float32)
     corner_threshold = grid_size - 2 * corner_levels_to_remove
     constellation = np.array(
@@ -93,11 +97,15 @@ def _cross_qam_symbols(
 
 
 def _cross_32qam_symbols(b: np.ndarray) -> np.ndarray:
-    return _cross_qam_symbols(b, bits_per_symbol=5, grid_size=6, corner_levels_to_remove=1)
+    return _cross_qam_symbols(
+        b, bits_per_symbol=5, grid_size=6, corner_levels_to_remove=1
+    )
 
 
 def _cross_128qam_symbols(b: np.ndarray) -> np.ndarray:
-    return _cross_qam_symbols(b, bits_per_symbol=7, grid_size=12, corner_levels_to_remove=2)
+    return _cross_qam_symbols(
+        b, bits_per_symbol=7, grid_size=12, corner_levels_to_remove=2
+    )
 
 
 def _apsk_symbols(b: np.ndarray, ring_counts: tuple[int, ...]) -> np.ndarray:
@@ -275,8 +283,8 @@ def make_digital_burst(
         i_up = np.zeros(nsyms * sps + half_symbol, dtype=np.complex64)
         q_up = np.zeros(nsyms * sps + half_symbol, dtype=np.complex64)
         i_up[: nsyms * sps : sps] = np.real(syms).astype(np.float32)
-        q_up[half_symbol : half_symbol + nsyms * sps : sps] = (
-            1j * np.imag(syms).astype(np.float32)
+        q_up[half_symbol : half_symbol + nsyms * sps : sps] = 1j * np.imag(syms).astype(
+            np.float32
         )
         taps = rrc_taps(rolloff, sps, span_symbols)
         shaped = np.convolve(i_up + q_up, taps.astype(np.complex64), mode="same")

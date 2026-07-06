@@ -2,7 +2,10 @@ import math
 
 from cortexforge.forge.utils.node_layout import distance
 from cortexforge.forge.utils.node_identity import get_node_name
-from cortexforge.forge.utils.compute_baseline import MIN_LINEAR_POWER, measure_window_power
+from cortexforge.forge.utils.compute_baseline import (
+    MIN_LINEAR_POWER,
+    measure_window_power,
+)
 
 
 def make_sigmf_annotations(annotations):
@@ -30,7 +33,13 @@ def theoretical_bandwidth_hz(ev):
 
 
 def timeline_to_sigmf_annotations(
-    events, rx_sample_rate, rx_uhd_t0, tx_center_freq, tx_gain, rx_data_path=None, baseline_stat=None
+    events,
+    rx_sample_rate,
+    rx_uhd_t0,
+    tx_center_freq,
+    tx_gain,
+    rx_data_path=None,
+    baseline_stat=None,
 ):
     ann = []
     baseline_mean_power = None
@@ -66,7 +75,12 @@ def timeline_to_sigmf_annotations(
             "cortexforge:rolloff": ev["rolloff"],
         }
 
-        if rx_data_path is not None and baseline_mean_power is not None and start >= 0 and count > 0:
+        if (
+            rx_data_path is not None
+            and baseline_mean_power is not None
+            and start >= 0
+            and count > 0
+        ):
             try:
                 burst_stats = measure_window_power(
                     rx_data_path,
@@ -74,10 +88,14 @@ def timeline_to_sigmf_annotations(
                     sample_count=count,
                 )
                 total_mean_power = burst_stats["mean_power"]
-                signal_mean_power = max(total_mean_power - baseline_mean_power, MIN_LINEAR_POWER)
-                annotation["cortexforge:rx_total_power_dbfs"] = burst_stats["power_dbfs"]
-                annotation["cortexforge:rx_signal_power_dbfs"] = (
-                    10.0 * math.log10(signal_mean_power / 2.0)
+                signal_mean_power = max(
+                    total_mean_power - baseline_mean_power, MIN_LINEAR_POWER
+                )
+                annotation["cortexforge:rx_total_power_dbfs"] = burst_stats[
+                    "power_dbfs"
+                ]
+                annotation["cortexforge:rx_signal_power_dbfs"] = 10.0 * math.log10(
+                    signal_mean_power / 2.0
                 )
                 annotation["cortexforge:snr_db"] = 10.0 * math.log10(
                     signal_mean_power / max(baseline_mean_power, MIN_LINEAR_POWER)

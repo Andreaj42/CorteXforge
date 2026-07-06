@@ -10,7 +10,9 @@ from cortexforge.forge.utils.load_timeline import load_timeline
 from cortexforge.forge.utils.sync_barrier.rx_barrier_server import RxBarrierServer
 from cortexforge.forge.utils.sync_barrier.sync_config import SyncConfig
 from cortexforge.forge.utils.uhd_time import arm_time_reset_next_pps
-from cortexforge.forge.utils.sigmf.sigmf_annotations import timeline_to_sigmf_annotations
+from cortexforge.forge.utils.sigmf.sigmf_annotations import (
+    timeline_to_sigmf_annotations,
+)
 from cortexforge.forge.utils.node_identity import get_node_name
 
 
@@ -25,7 +27,9 @@ def main(args):
 
     radios = {str(ev["radio"]) for ev in timeline if ev.get("radio")}
 
-    logger.debug(f"Radios in timeline: {radios}, expecting {len(radios)} to synchronize")
+    logger.debug(
+        f"Radios in timeline: {radios}, expecting {len(radios)} to synchronize"
+    )
 
     raw_path = out_dir / "temp.cf32"
 
@@ -70,14 +74,10 @@ def main(args):
     expected_size = int(args.duration * args.sample_rate) * 8
     actual_size = raw_path.stat().st_size
 
-    stats = compute_baseline(
-        path=str(raw_path),
-        sample_rate=args.sample_rate
-    )
+    stats = compute_baseline(path=str(raw_path), sample_rate=args.sample_rate)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     base_path = out_dir / f"{stamp}"
-
 
     logger.info(f"Recording stats: {stats}")
     data_path, meta_path = write_sigmf(
@@ -86,11 +86,11 @@ def main(args):
         stat=stats,
         sample_rate=args.sample_rate,
         center_freq=args.frequency,
-        hardware=tb.src.get_usrp_info().get('mboard_id'),
+        hardware=tb.src.get_usrp_info().get("mboard_id"),
         author="Andrea Joly",
         description="CorteXForge recording",
         gain=args.gain,
-        annotations = timeline_to_sigmf_annotations(
+        annotations=timeline_to_sigmf_annotations(
             events=timeline,
             rx_sample_rate=args.sample_rate,
             rx_uhd_t0=rx_uhd_t0,

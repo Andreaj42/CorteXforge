@@ -31,7 +31,12 @@ def measure_window_power(path, sample_start, sample_count):
     if effective_samples == 0:
         raise ValueError("window contains incomplete IQ samples")
 
-    mean_power = float(np.mean(i[:effective_samples] * i[:effective_samples] + q[:effective_samples] * q[:effective_samples]))
+    mean_power = float(
+        np.mean(
+            i[:effective_samples] * i[:effective_samples]
+            + q[:effective_samples] * q[:effective_samples]
+        )
+    )
 
     return {
         "sample_start": int(sample_start),
@@ -54,7 +59,9 @@ def compute_baseline(path, sample_rate, skip=0.5, win_size=1.0):
     """
     skip_samples = int(skip * sample_rate)
     win_samples = int(win_size * sample_rate)
-    stats = measure_window_power(path, sample_start=skip_samples, sample_count=win_samples)
+    stats = measure_window_power(
+        path, sample_start=skip_samples, sample_count=win_samples
+    )
 
     return {
         "skip_samples": skip_samples,

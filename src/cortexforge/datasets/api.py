@@ -116,7 +116,10 @@ def _download_file(url: str, destination: Path, chunk_size: int = 1024 * 1024) -
 
             if total_bytes:
                 percent = int((downloaded_bytes / total_bytes) * 100)
-                if percent >= last_logged_percent + 5 or downloaded_bytes == total_bytes:
+                if (
+                    percent >= last_logged_percent + 5
+                    or downloaded_bytes == total_bytes
+                ):
                     elapsed = max(time.monotonic() - started_at, 1e-9)
                     speed = downloaded_bytes / elapsed
                     _update_progress_line(
@@ -126,7 +129,10 @@ def _download_file(url: str, destination: Path, chunk_size: int = 1024 * 1024) -
                     )
                     last_logged_percent = percent
             else:
-                if downloaded_bytes == len(chunk) or downloaded_bytes % (50 * chunk_size) == 0:
+                if (
+                    downloaded_bytes == len(chunk)
+                    or downloaded_bytes % (50 * chunk_size) == 0
+                ):
                     elapsed = max(time.monotonic() - started_at, 1e-9)
                     speed = downloaded_bytes / elapsed
                     _update_progress_line(

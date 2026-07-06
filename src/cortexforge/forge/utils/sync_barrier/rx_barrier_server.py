@@ -16,13 +16,11 @@ class RxBarrierServer:
         self.rep.bind(f"tcp://*:{cfg.port_reg}")
         logger.info("[RX][REP] bind tcp://*:%s", cfg.port_reg)
 
-
         self.pub = self.ctx.socket(zmq.PUB)
         self.pub.bind(f"tcp://*:{cfg.port_pub}")
         logger.info("[RX][PUB] bind tcp://*:%s", cfg.port_pub)
 
         self.registered = set()
-        
 
     def wait_for_all(self):
         logger.info("[RX] Waiting for %d TX registrations...", self.cfg.expected_tx)
