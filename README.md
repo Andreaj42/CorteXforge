@@ -56,25 +56,16 @@ To monitor your experiment, use:
 Just want to use a dataset without running your own experiments? Simply download one of the pre-generated datasets produced with CorteXforge.
 
 First, install the dataset API:
-
-```bash
-pip install cortexforge
-```
+- ```pip install cortexforge```
 
 List all available datasets:
-```bash
-cortexforge datasets list
-```
+- ```cortexforge datasets list```
 
-Download a dataset
-```bash
-cortexforge datasets download <dataset_name>
-```
+Download a dataset:
+- ```cortexforge datasets download <dataset_name>```
 
 For example:
-```bash
-cortexforge datasets download modfore
-```
+- ```cortexforge datasets download modfore```
 
 ### Docker Images :whale:
 To simplify deployment and ensure reproductibility, we generated a Docker image.
