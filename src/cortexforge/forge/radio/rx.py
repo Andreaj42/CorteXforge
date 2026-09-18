@@ -12,26 +12,25 @@ from cortexforge.forge.utils.sigmf.sigmf_annotations import (
     timeline_to_sigmf_annotations,
 )
 from cortexforge.forge.utils.sigmf_writer import write_sigmf
-from cortexforge.forge.utils.sync_barrier.rx_barrier_server import RxBarrierServer
+from cortexforge.forge.utils.sync_barrier.sync_barrier_client import SyncBarrierClient
 from cortexforge.forge.utils.sync_barrier.sync_config import SyncConfig
 from cortexforge.forge.utils.uhd_time import arm_time_reset_next_pps
 
 logger = getLogger(__name__)
 
 
-def main(args):
-    out_dir = args.output_path
+def main(args) -> None:
+    node_name = get_node_name()
+
+    out_dir = args.output_path / node_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    timeline = load_timeline(args.timeline)
-
-    radios = {str(ev["radio"]) for ev in timeline if ev.get("radio")}
-
-    logger.debug(
-        f"Radios in timeline: {radios}, expecting {len(radios)} to synchronize"
-    )
-
     raw_path = out_dir / "temp.cf32"
+
+    logger.info("Starting receiver on node %s", node_name)
+    logger.info("Output directory: %s", out_dir)
+
+    timeline = load_timeline(args.timeline)
 
     tb = RxRecorder(
         usrp_args="",
@@ -40,39 +39,76 @@ def main(args):
         gain=args.gain,
         out_path=str(raw_path),
     )
+
     cfg = SyncConfig(
-        server_host=get_node_name(),
+        server_host=args.sync_node,
         port_reg=5555,
         port_pub=5556,
-        expected_tx=len(radios),
     )
-    barrier = RxBarrierServer(cfg)
-    barrier.wait_for_all()
 
-    barrier.broadcast({"type": "GO"})
+    client = SyncBarrierClient(
+        cfg,
+        node_name=node_name,
+        role="rx",
+    )
+
+    logger.info(
+        "Receiver initialized. Registering to synchronization node %s",
+        args.sync_node,
+    )
+
+    client.register()
+
+    logger.info("Waiting for synchronization GO...")
+    client.wait_go()
+
+    logger.info("GO received. Arming UHD time synchronization.")
+
+    # Reset UHD time to zero on the next PPS edge.
     arm_time_reset_next_pps(tb.src)
 
     capture_start_uhd = 1.0
+
     if hasattr(tb.src, "set_start_time"):
         tb.src.set_start_time(uhd.time_spec(capture_start_uhd))
-        logger.info("RX stream scheduled at UHD t=%.3f s", capture_start_uhd)
+
+        logger.info(
+            "RX stream scheduled at UHD t=%.3f s",
+            capture_start_uhd,
+        )
+
         rx_uhd_t0 = capture_start_uhd
+
     else:
         rx_uhd_t0 = None
         logger.warning("RX source has no set_start_time(); using runtime t0 estimate")
 
     tb.start()
+
     if rx_uhd_t0 is None:
         rx_uhd_t0 = tb.src.get_time_now().get_real_secs()
 
-    while tb.src.get_time_now().get_real_secs() < rx_uhd_t0 + args.duration:
+    capture_end_uhd = rx_uhd_t0 + args.duration
+
+    logger.info(
+        "Recording from UHD t=%.6f to t=%.6f",
+        rx_uhd_t0,
+        capture_end_uhd,
+    )
+
+    while tb.src.get_time_now().get_real_secs() < capture_end_uhd:
         sleep(0.001)
 
     tb.stop()
     tb.wait()
 
+    logger.info("Recording completed.")
+
     expected_size = int(args.duration * args.sample_rate) * 8
     actual_size = raw_path.stat().st_size
+
+    logger.info("Expected size: %d bytes", expected_size)
+    logger.info("Actual size: %d bytes", actual_size)
 
     check_parseval(
         path=str(raw_path),
@@ -82,12 +118,25 @@ def main(args):
         center_frequency=args.frequency,
     )
 
-    stats = compute_baseline(path=str(raw_path), sample_rate=args.sample_rate)
+    stats = compute_baseline(
+        path=str(raw_path),
+        sample_rate=args.sample_rate,
+    )
+
+    logger.info("Recording stats: %s", stats)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    base_path = out_dir / f"{stamp}"
+    base_path = out_dir / stamp
 
-    logger.info(f"Recording stats: {stats}")
+    annotations = timeline_to_sigmf_annotations(
+        events=timeline,
+        rx_sample_rate=args.sample_rate,
+        rx_center_frequency=args.frequency,
+        rx_uhd_t0=rx_uhd_t0,
+        rx_data_path=str(raw_path),
+        baseline_stat=stats,
+    )
+
     data_path, meta_path = write_sigmf(
         base_path=str(base_path),
         data_file=str(raw_path),
@@ -96,17 +145,13 @@ def main(args):
         center_freq=args.frequency,
         hardware=tb.src.get_usrp_info().get("mboard_id"),
         author="Andrea Joly",
-        description="CorteXforge recording",
+        description=f"CorteXforge recording from {node_name}",
         gain=args.gain,
-        annotations=timeline_to_sigmf_annotations(
-            events=timeline,
-            rx_sample_rate=args.sample_rate,
-            rx_center_frequency=args.frequency,
-            rx_uhd_t0=rx_uhd_t0,
-            rx_data_path=str(raw_path),
-            baseline_stat=stats,
-        ),
+        annotations=annotations,
     )
-    logger.info(f"SigMF written: {data_path} and {meta_path}")
-    logger.info("Expected size: %d", expected_size)
-    logger.info("Actual size: %d", actual_size)
+
+    logger.info(
+        "SigMF written: %s and %s",
+        data_path,
+        meta_path,
+    )

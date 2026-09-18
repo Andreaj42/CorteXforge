@@ -21,8 +21,7 @@ class ExperimentScenario:
 
     def __init__(
         self,
-        nodes: list[str],
-        rx_node: str,
+        tx_nodes: list[str],
         duration: float,
         rx_sample_rate: int,
         warmup_time: float = 4.0,
@@ -33,18 +32,19 @@ class ExperimentScenario:
         tx_sample_rate: int = 10_000_000,
         min_burst_gap_s: float = 0.010,
     ):
-        if len(nodes) < 2:
-            raise ValueError("You must provide at least one RX node and one TX node.")
+        if not tx_nodes:
+            raise ValueError("At least one transmitter node must be provided.")
+
+        if len(set(tx_nodes)) != len(tx_nodes):
+            raise ValueError("Transmitter nodes must be unique.")
+
+        self.tx_nodes = list(tx_nodes)
 
         if warmup_time >= duration:
             raise ValueError("warmup_time must be strictly less than total duration.")
 
         if min_burst_gap_s < 0:
             raise ValueError("min_burst_gap_s must be greater than or equal to 0.")
-
-        self.nodes = nodes
-        self.rx_node = rx_node
-        self.tx_nodes = [node for node in nodes if node != rx_node]
 
         self.duration = duration
         self.rx_sample_rate = rx_sample_rate

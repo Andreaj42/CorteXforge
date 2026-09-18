@@ -8,7 +8,12 @@ def run(args) -> None:
     logger.info("Starting CorteXForge...")
     logger.info(f"Args={args}")
 
-    if args.role == "rx":
+    if args.role == "sync":
+        from cortexforge.forge.sync import main as sync_main
+
+        sync_main(args)
+
+    elif args.role == "rx":
         from cortexforge.forge.radio.rx import main as rx_main
 
         rx_main(args)

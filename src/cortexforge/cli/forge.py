@@ -9,7 +9,14 @@ def configure_parser(parser: ArgumentParser) -> ArgumentParser:
     sub = parser.add_subparsers(
         dest="role",
         required=True,
-        help="Radio role for this node (rx=receiver, tx=transmitter)",
+        help="Radio role for this node (rx=receiver, tx=transmitter, sync=synchronization)",
+    )
+    sync = sub.add_parser("sync", help="Synchronization node")
+    sync.add_argument(
+        "--expected-participants",
+        type=int,
+        required=True,
+        help="Expected number of participants (rx + tx)",
     )
 
     rx = sub.add_parser("rx", help="Receiver mode")
@@ -25,6 +32,9 @@ def configure_parser(parser: ArgumentParser) -> ArgumentParser:
     )
     rx.add_argument("--timeline", type=Path, required=True, help="Path to timeline CSV")
     rx.add_argument(
+        "--sync-node", type=str, required=True, help="Select the synchronization node"
+    )
+    rx.add_argument(
         "--output-path",
         type=Path,
         required=True,
@@ -37,7 +47,7 @@ def configure_parser(parser: ArgumentParser) -> ArgumentParser:
     tx = sub.add_parser("tx", help="Transmitter")
     tx.add_argument("--timeline", type=Path, required=True, help="Path to timeline CSV")
     tx.add_argument(
-        "--record-node", type=str, required=True, help="Select the recorder node"
+        "--sync-node", type=str, required=True, help="Select the synchronization node"
     )
     tx.add_argument(
         "--frequency", type=int, required=True, help="Transmitter center frequency (Hz)"

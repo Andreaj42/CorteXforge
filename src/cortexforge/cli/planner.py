@@ -1,7 +1,6 @@
 """CLI argument parser for CorteXForge planner."""
 
 from argparse import Action, ArgumentParser, Namespace
-from pathlib import Path
 
 from cortexforge.planner.generators.modulations import DEFAULT_MODULATIONS
 
@@ -34,7 +33,29 @@ def configure_parser(parser: ArgumentParser) -> ArgumentParser:
     parser.add_argument(
         "--duration", type=int, default=60, help="Experiment duration in seconds"
     )
-    parser.add_argument("--rx-node", type=str, default=None, help="Receiver node")
+    parser.add_argument(
+        "--rx-nodes",
+        nargs="+",
+        type=str,
+        required=True,
+        help="Receiver nodes",
+    )
+
+    parser.add_argument(
+        "--tx-nodes",
+        nargs="+",
+        type=str,
+        required=True,
+        help="Transmitter nodes",
+    )
+
+    parser.add_argument(
+        "--sync-node",
+        type=str,
+        required=True,
+        help="Dedicated node coordinating experiment synchronization",
+    )
+
     parser.add_argument(
         "--rx-frequency", type=int, default=2450000000, help="Receiver frequency"
     )
@@ -61,16 +82,9 @@ def configure_parser(parser: ArgumentParser) -> ArgumentParser:
         ),
     )
     parser.add_argument(
-        "--nodes-path",
-        type=Path,
-        default="configs/nodes.yaml",
-        help="Path to nodes.yaml file",
-    )
-    parser.add_argument(
         "--modulations",
         action=_ModulationAction,
         nargs="+",
-        metavar="MOD",
         default=None,
         help=(
             "Modulations to include in the generated dataset. "

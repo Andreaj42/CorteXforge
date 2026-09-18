@@ -7,37 +7,57 @@ logger = logging.getLogger(__name__)
 
 
 def generate_cortexlab_scenario(
-    nodes: list[str],
-    rx_node: str,
+    rx_nodes: list[str],
+    tx_nodes: list[str],
+    sync_node: str,
     duration: int,
     image: str,
     rx_command: str,
     tx_command: str,
-    description: str = "Dataset Generator",
+    sync_command: str,
     output_path: str = "scenario.yaml",
 ):
-    data = {"description": description, "duration": duration, "nodes": {}}
-    data["nodes"][rx_node.replace("mnode", "node")] = {
+    data = {
+        "description": "CorteXforge",
+        "duration": duration,
+        "nodes": {},
+    }
+
+    # Receiver nodes
+    for node in rx_nodes:
+        data["nodes"][node.replace("mnode", "node")] = {
+            "container": [
+                {
+                    "image": image,
+                    "command": rx_command,
+                }
+            ]
+        }
+
+    # Transmitter nodes
+    for node in tx_nodes:
+        data["nodes"][node.replace("mnode", "node")] = {
+            "container": [
+                {
+                    "image": image,
+                    "command": tx_command,
+                }
+            ]
+        }
+
+    # Synchronization node
+    data["nodes"][sync_node.replace("mnode", "node")] = {
         "container": [
             {
                 "image": image,
-                "command": rx_command,
+                "command": sync_command,
             }
         ]
     }
-    for node in nodes:
-        if node != rx_node:
-            data["nodes"][node.replace("mnode", "node")] = {
-                "container": [
-                    {
-                        "image": image,
-                        "command": tx_command,
-                    }
-                ]
-            }
 
     out_path = Path(output_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+
     with out_path.open("w") as f:
         safe_dump(data, f, sort_keys=False)
 
