@@ -12,7 +12,7 @@ def make_sigmf_captures(center_freq: float, gain: float, hardware: str, stat):
             "core:frequency": float(center_freq),
             "core:sample_start": 0,
             "core:hw": hardware,
-            "cortexforge:node": get_node_name(),
+            "cortexforge:receiver_node": get_node_name(),
             "cortexforge:gain": gain,
             "cortexforge:baseline": {
                 "sample_start": stat["skip_samples"],
