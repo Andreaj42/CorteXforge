@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from cortexforge.cli.planner import parse_args
 from cortexforge.planner.generators.cortexlab_scenario import (
     generate_cortexlab_scenario,
@@ -37,6 +39,8 @@ def validate_nodes(
 
 def run(args) -> None:
     logger.info("Starting scenario generation...")
+    experiment_id = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    logger.info("Experiment ID: %s", experiment_id)
 
     validate_nodes(
         rx_nodes=args.rx_nodes,
@@ -80,7 +84,7 @@ def run(args) -> None:
             f"--frequency {args.rx_frequency} "
             f"--gain {args.rx_gain} "
             f"--sample-rate {args.rx_sample_rate} "
-            f"--output-path /cortexlab/homes/{args.username}/out/ "
+            f"--output-path /cortexlab/homes/{args.username}/out/{experiment_id} "
             f"--timeline /cortexlab/homes/{args.username}/cxf/timeline.csv "
             f'--sync-node {args.sync_node}"'
         ),
