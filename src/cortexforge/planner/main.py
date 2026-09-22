@@ -84,7 +84,7 @@ def run(args) -> None:
             f"--frequency {args.rx_frequency} "
             f"--gain {args.rx_gain} "
             f"--sample-rate {args.rx_sample_rate} "
-            f"--output-path /cortexlab/homes/{args.username}/out/{experiment_id} "
+            f"--output-path /cortexlab/homes/{args.username}/out/{experiment_id}/ "
             f"--timeline /cortexlab/homes/{args.username}/cxf/timeline.csv "
             f'--sync-node {args.sync_node}"'
         ),
