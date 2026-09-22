@@ -5,7 +5,7 @@ logger = setup_logger()
 
 
 def run(args) -> None:
-    logger.info("Starting CorteXForge...")
+    logger.info("Starting CorteXforge...")
     logger.info(f"Args={args}")
 
     if args.role == "sync":
