@@ -40,7 +40,7 @@ def configure_parser(parser: ArgumentParser) -> ArgumentParser:
         required=True,
         help=(
             "Path to output directory for results "
-            "(e.g. /cortexlab/homes/<username>/out)"
+            "(e.g. /cortexlab/homes/<username>/out/<expriment-id>)"
         ),
     )
 
