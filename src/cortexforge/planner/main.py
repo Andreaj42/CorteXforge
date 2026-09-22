@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from pathlib import Path
 
 from cortexforge.cli.planner import parse_args
 from cortexforge.planner.generators.cortexlab_scenario import (
@@ -42,6 +43,9 @@ def run(args) -> None:
     experiment_id = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     logger.info("Experiment ID: %s", experiment_id)
 
+    output_dir = Path(f"cxf/{experiment_id}/")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     validate_nodes(
         rx_nodes=args.rx_nodes,
         tx_nodes=args.tx_nodes,
@@ -65,7 +69,7 @@ def run(args) -> None:
     print(df.head())
 
     scenario.to_csv(
-        "configs/timeline.csv",
+        f"cxf/{experiment_id}/timeline.csv",
         n_signals=args.n_signals,
         allow_overlap=args.overlapping,
         seed=args.seed,
@@ -99,7 +103,7 @@ def run(args) -> None:
             'bash -lc "cortexforge forge sync '
             f'--expected-participants {n_participants}"'
         ),
-        output_path="configs/scenario.yaml",
+        output_path=f"cxf/{experiment_id}/scenario.yaml",
     )
 
     logger.info("Scenario generation completed.")
