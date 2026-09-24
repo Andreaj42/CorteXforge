@@ -1,5 +1,4 @@
 import shutil
-import tempfile
 from datetime import datetime, timezone
 from logging import getLogger
 from pathlib import Path
@@ -25,19 +24,13 @@ logger = getLogger(__name__)
 def main(args) -> None:
     node_name = get_node_name()
 
-    local_root = Path("/var/tmp/cortexforge")
-    local_root.mkdir(parents=True, exist_ok=True)
+    local_dir = Path("/capture")
+    local_dir.mkdir(parents=True, exist_ok=True)
 
-    local_dir = Path(
-        tempfile.mkdtemp(
-            prefix=f"{node_name}-",
-            dir=local_root,
-        )
-    )
     raw_path = local_dir / "temp.cf32"
 
     logger.info("Local capture directory: %s", local_dir)
-    free_size = shutil.disk_usage(local_root).free
+    free_size = shutil.disk_usage(local_dir).free
 
     logger.info("Available local disk space: %.2f GB", free_size / 1e9)
 
@@ -183,7 +176,12 @@ def main(args) -> None:
     shutil.copy2(local_meta_path, final_meta_path)
 
     logger.info(
-        "SigMF written: %s and %s",
+        "SigMF successfully published: %s and %s",
         final_data_path,
         final_meta_path,
+    )
+    shutil.rmtree(local_dir)
+    logger.info(
+        "Local capture data removed: %s",
+        local_dir,
     )
