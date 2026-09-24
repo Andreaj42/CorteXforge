@@ -43,7 +43,7 @@ def main(args):
         )
 
     tb = TxTimeline(
-        usrp_args="",
+        usrp_args="ignore-cal-file=1",
         rate=events_with_iq[0]["sample_rate_sps"],
         center_freq=args.frequency,
         gain=args.gain,

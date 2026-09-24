@@ -33,7 +33,7 @@ def main(args) -> None:
     timeline = load_timeline(args.timeline)
 
     tb = RxRecorder(
-        usrp_args="",
+        usrp_args="ignore-cal-file=1",
         freq=args.frequency,
         rate=args.sample_rate,
         gain=args.gain,
