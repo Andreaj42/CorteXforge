@@ -1,5 +1,8 @@
+import shutil
+import tempfile
 from datetime import datetime, timezone
 from logging import getLogger
+from pathlib import Path
 from time import sleep
 
 from gnuradio import uhd
@@ -22,13 +25,25 @@ logger = getLogger(__name__)
 def main(args) -> None:
     node_name = get_node_name()
 
-    out_dir = args.output_path / node_name
-    out_dir.mkdir(parents=True, exist_ok=True)
+    local_root = Path("/var/tmp/cortexforge")
+    local_root.mkdir(parents=True, exist_ok=True)
 
-    raw_path = out_dir / "temp.cf32"
+    local_dir = Path(
+        tempfile.mkdtemp(
+            prefix=f"{node_name}-",
+            dir=local_root,
+        )
+    )
+    raw_path = local_dir / "temp.cf32"
+
+    logger.info("Local capture directory: %s", local_dir)
+    free_size = shutil.disk_usage(local_root).free
+
+    logger.info("Available local disk space: %.2f GB", free_size / 1e9)
 
     logger.info("Starting receiver on node %s", node_name)
-    logger.info("Output directory: %s", out_dir)
+
+    final_out_dir = args.output_path / node_name
 
     timeline = load_timeline(args.timeline)
 
@@ -104,8 +119,8 @@ def main(args) -> None:
 
     logger.info("Recording completed.")
 
-    expected_size = int(args.duration * args.sample_rate) * 8
     actual_size = raw_path.stat().st_size
+    expected_size = int(args.duration * args.sample_rate) * 8
 
     logger.info("Expected size: %d bytes", expected_size)
     logger.info("Actual size: %d bytes", actual_size)
@@ -126,7 +141,7 @@ def main(args) -> None:
     logger.info("Recording stats: %s", stats)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    base_path = out_dir / stamp
+    local_base_path = local_dir / stamp
 
     annotations = timeline_to_sigmf_annotations(
         events=timeline,
@@ -137,8 +152,8 @@ def main(args) -> None:
         baseline_stat=stats,
     )
 
-    data_path, meta_path = write_sigmf(
-        base_path=str(base_path),
+    local_data_path, local_meta_path = write_sigmf(
+        base_path=str(local_base_path),
         data_file=str(raw_path),
         stat=stats,
         sample_rate=args.sample_rate,
@@ -150,8 +165,25 @@ def main(args) -> None:
         annotations=annotations,
     )
 
+    final_out_dir.mkdir(parents=True, exist_ok=True)
+
+    local_data_path = Path(local_data_path)
+    local_meta_path = Path(local_meta_path)
+
+    final_data_path = final_out_dir / local_data_path.name
+    final_meta_path = final_out_dir / local_meta_path.name
+
+    logger.info(
+        "Copying dataset to NFS: %s",
+        final_data_path,
+    )
+
+    shutil.copy2(local_data_path, final_data_path)
+
+    shutil.copy2(local_meta_path, final_meta_path)
+
     logger.info(
         "SigMF written: %s and %s",
-        data_path,
-        meta_path,
+        final_data_path,
+        final_meta_path,
     )
