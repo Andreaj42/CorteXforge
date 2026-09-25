@@ -19,7 +19,9 @@ class RxRecorder(gr.top_block):
 
         self.src = uhd.usrp_source(
             usrp_args,
-            uhd.stream_args(cpu_format="fc32", channels=[self.rx_channel]),
+            uhd.stream_args(
+                cpu_format="sc16", otw_format="sc16", channels=[self.rx_channel]
+            ),
         )
         self.src.set_clock_source("external", self.rx_channel)
         self.src.set_time_source("external", self.rx_channel)
@@ -28,7 +30,7 @@ class RxRecorder(gr.top_block):
         self._try_set_rx_agc(False)
         self.src.set_gain(gain, self.rx_channel)
         self.src.set_antenna("TX/RX", self.rx_channel)
-        self.sink = blocks.file_sink(gr.sizeof_gr_complex, out_path, False)
+        self.sink = blocks.file_sink(gr.sizeof_short * 2, out_path, False)
         self.sink.set_unbuffered(False)
         self.connect(self.src, self.sink)
 

@@ -27,7 +27,7 @@ def main(args) -> None:
     local_dir = Path("/capture")
     local_dir.mkdir(parents=True, exist_ok=True)
 
-    raw_path = local_dir / "temp.cf32"
+    raw_path = local_dir / "temp.ci16"
 
     logger.info("Local capture directory: %s", local_dir)
     free_size = shutil.disk_usage(local_dir).free
@@ -113,7 +113,7 @@ def main(args) -> None:
     logger.info("Recording completed.")
 
     actual_size = raw_path.stat().st_size
-    expected_size = int(args.duration * args.sample_rate) * 8
+    expected_size = int(args.duration * args.sample_rate) * 4
 
     logger.info("Expected size: %d bytes", expected_size)
     logger.info("Actual size: %d bytes", actual_size)

@@ -20,7 +20,7 @@ def write_sigmf(
 ):
     """
     base_path: path without extension
-    data_file: existing IQ file path (fc32 raw)
+    data_file: existing IQ file path (ci16 raw)
     Creates:
       - base_path.sigmf-data
       - base_path.sigmf-meta

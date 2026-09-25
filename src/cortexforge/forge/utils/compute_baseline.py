@@ -3,6 +3,22 @@ import math
 import numpy as np
 
 MIN_LINEAR_POWER = np.finfo(np.float32).tiny
+SC16_DTYPE = np.dtype("<i2")
+SC16_SCALE = 32768.0
+SC16_BYTES_PER_SAMPLE = 4
+
+
+def _sc16_to_complex64(raw):
+    """
+    Convert interleaved sc16 IQ samples to normalized complex64.
+    """
+    if raw.size % 2 != 0:
+        raw = raw[:-1]
+
+    i = raw[0::2].astype(np.float32)
+    q = raw[1::2].astype(np.float32)
+
+    return (i / SC16_SCALE + 1j * (q / SC16_SCALE)).astype(np.complex64)
 
 
 def _dbfs_from_mean_power(mean_power):
@@ -24,26 +40,19 @@ def scale_noise_power_to_band(
 
 def measure_window_power(path, sample_start, sample_count):
     """
-    Measure the average power of a complex float32 IQ window.
+    Measure the average power of an interleaved complex int16 IQ window.
 
     Returns a dictionary describing the effective measured window.
     """
-    offset_bytes = int(sample_start) * 2 * np.dtype(np.float32).itemsize
+    offset_bytes = int(sample_start) * SC16_BYTES_PER_SAMPLE
     count_iq = int(sample_count) * 2
 
-    x = np.fromfile(path, dtype=np.float32, count=count_iq, offset=offset_bytes)
-    i = x[0::2]
-    q = x[1::2]
-    effective_samples = min(i.size, q.size)
-    if effective_samples == 0:
-        raise ValueError("window contains incomplete IQ samples")
+    x = np.fromfile(path, dtype=SC16_DTYPE, count=count_iq, offset=offset_bytes)
+    z = _sc16_to_complex64(x)
 
-    mean_power = float(
-        np.mean(
-            i[:effective_samples] * i[:effective_samples]
-            + q[:effective_samples] * q[:effective_samples]
-        )
-    )
+    effective_samples = z.size
+
+    mean_power = float(np.mean(z.real * z.real + z.imag * z.imag))
 
     return {
         "sample_start": int(sample_start),
@@ -101,7 +110,7 @@ def measure_band_power(
     if n_blocks == 0:
         raise ValueError("window is shorter than fft_size")
 
-    offset_bytes = int(sample_start) * 2 * np.dtype(np.float32).itemsize
+    offset_bytes = int(sample_start) * SC16_BYTES_PER_SAMPLE
 
     band_powers = []
 
@@ -111,14 +120,14 @@ def measure_band_power(
         for _ in range(n_blocks):
             raw = np.fromfile(
                 f,
-                dtype=np.float32,
+                dtype=SC16_DTYPE,
                 count=2 * fft_size,
             )
 
             if raw.size < 2 * fft_size:
                 break
 
-            z = raw[0::2].astype(np.complex64) + 1j * raw[1::2].astype(np.complex64)
+            z = _sc16_to_complex64(raw)
 
             spectrum = np.fft.fft(z)
 
