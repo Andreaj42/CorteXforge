@@ -44,7 +44,7 @@ def main(args) -> None:
     timeline = load_timeline(args.timeline)
 
     tb = RxRecorder(
-        usrp_args=("ignore-cal-file=1,clock_source=external,time_source=external"),
+        usrp_args="ignore-cal-file=1",
         freq=args.frequency,
         rate=args.sample_rate,
         gain=args.gain,
