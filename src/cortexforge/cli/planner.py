@@ -2,26 +2,28 @@
 
 from argparse import Action, ArgumentParser, Namespace
 
-from cortexforge.planner.generators.modulations import DEFAULT_MODULATIONS
+from cortexforge.modulations import normalize_modulation
 
 
 def _split_modulations(value: str) -> list[str]:
-    return [item.strip().upper() for item in value.split(",") if item.strip()]
+    return [item.strip() for item in value.split(",") if item.strip()]
 
 
 class _ModulationAction(Action):
-    """Parse comma-separated and repeated modulation values into a flat list."""
+    """Parse and validate modulation values."""
 
     def __call__(self, parser, namespace, values, option_string=None):
         modulations = list(getattr(namespace, self.dest, None) or [])
-        for value in values:
-            modulations.extend(_split_modulations(value))
-        unknown = sorted(set(modulations) - set(DEFAULT_MODULATIONS))
-        if unknown:
-            parser.error(
-                f"unsupported modulation(s): {', '.join(unknown)}. "
-                f"Supported values are: {', '.join(DEFAULT_MODULATIONS)}"
-            )
+
+        try:
+            for value in values:
+                for modulation in _split_modulations(value):
+                    modulations.append(normalize_modulation(modulation))
+
+        except ValueError as exc:
+            parser.error(str(exc))
+
+        modulations = list(dict.fromkeys(modulations))
         setattr(namespace, self.dest, modulations)
 
 

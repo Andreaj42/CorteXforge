@@ -4,7 +4,7 @@ from itertools import product
 
 import pandas as pd
 
-from cortexforge.planner.generators.modulations import DEFAULT_MODULATIONS
+from cortexforge.modulations import SUPPORTED_MODULATIONS, normalize_modulations
 
 
 class ExperimentScenario:
@@ -25,12 +25,12 @@ class ExperimentScenario:
         duration: float,
         rx_sample_rate: int,
         warmup_time: float = 4.0,
-        amplitude_range: tuple[float, float] = (0.01, 1.0),
+        amplitude_range: tuple[float, float] = (0.3, 0.9),
         modulations: list[str] | None = None,
         symbol_rates: Sequence[float] | None = None,
         roll_offs: Sequence[float] | None = None,
         tx_sample_rate: int = 10_000_000,
-        min_burst_gap_s: float = 0.010,
+        min_burst_gap_s: float = 0.002,
     ):
         if not tx_nodes:
             raise ValueError("At least one transmitter node must be provided.")
@@ -53,7 +53,7 @@ class ExperimentScenario:
         self.min_burst_gap_s = min_burst_gap_s
 
         selected_modulations = (
-            DEFAULT_MODULATIONS if modulations is None else modulations
+            SUPPORTED_MODULATIONS if modulations is None else modulations
         )
         self.modulations = self._validate_modulations(selected_modulations)
 
@@ -83,7 +83,7 @@ class ExperimentScenario:
 
         self.tx_sample_rate = tx_sample_rate
 
-        self.duration_range_s = (0.02, 0.10)
+        self.duration_range_s = (0.01, 0.03)
 
         self._validate_signal_parameters()
 
@@ -134,18 +134,7 @@ class ExperimentScenario:
         if not modulations:
             raise ValueError("At least one modulation must be provided.")
 
-        normalized = list(
-            dict.fromkeys(modulation.upper() for modulation in modulations)
-        )
-        unknown = sorted(set(normalized) - set(DEFAULT_MODULATIONS))
-        if unknown:
-            supported = ", ".join(DEFAULT_MODULATIONS)
-            raise ValueError(
-                f"Unsupported planner modulation(s): {', '.join(unknown)}. "
-                f"Supported modulations are: {supported}"
-            )
-
-        return normalized
+        return normalize_modulations(modulations)
 
     @staticmethod
     def _intervals_overlap(

@@ -1,35 +1,7 @@
 import numpy as np
 
-
-def rrc_taps(beta: float, sps: int, span: int) -> np.ndarray:
-    """
-    Root Raised Cosine taps.
-
-    span: in symbols (total taps = span*sps + 1)
-    """
-    N = span * sps
-    t = np.arange(-N / 2, N / 2 + 1) / sps
-    taps = np.zeros_like(t, dtype=np.float64)
-
-    for i, ti in enumerate(t):
-        if abs(ti) < 1e-12:
-            taps[i] = 1.0 - beta + (4 * beta / np.pi)
-        elif beta > 0 and abs(abs(4 * beta * ti) - 1.0) < 1e-12:
-            # t = +- 1/(4beta)
-            taps[i] = (beta / np.sqrt(2)) * (
-                (1 + 2 / np.pi) * np.sin(np.pi / (4 * beta))
-                + (1 - 2 / np.pi) * np.cos(np.pi / (4 * beta))
-            )
-        else:
-            num = np.sin(np.pi * ti * (1 - beta)) + 4 * beta * ti * np.cos(
-                np.pi * ti * (1 + beta)
-            )
-            den = np.pi * ti * (1 - (4 * beta * ti) ** 2)
-            taps[i] = num / den
-
-    # Unit-energy normalization of the pulse-shaping filter.
-    taps /= np.sqrt(np.sum(taps**2) + 1e-12)
-    return taps.astype(np.float32)
+from cortexforge.forge.radio.pulse_shaping import rrc_taps
+from cortexforge.modulations import get_modulation_spec, normalize_modulation
 
 
 def normalize_burst_rms(
@@ -124,24 +96,6 @@ def _cross_qam_symbols(
     return x.astype(np.complex64)
 
 
-def _cross_32qam_symbols(b: np.ndarray) -> np.ndarray:
-    return _cross_qam_symbols(
-        b,
-        bits_per_symbol=5,
-        grid_size=6,
-        corner_levels_to_remove=1,
-    )
-
-
-def _cross_128qam_symbols(b: np.ndarray) -> np.ndarray:
-    return _cross_qam_symbols(
-        b,
-        bits_per_symbol=7,
-        grid_size=12,
-        corner_levels_to_remove=2,
-    )
-
-
 def _apsk_symbols(b: np.ndarray, ring_counts: tuple[int, ...]) -> np.ndarray:
     b = b.reshape(-1, int(np.log2(sum(ring_counts))))
     idx = _bits_to_int(b)
@@ -211,7 +165,7 @@ def map_symbols(mod: str, b: np.ndarray) -> np.ndarray:
     match mod:
         case "OOK":
             return _ask_symbols(b, 1)
-        case "PAM4" | "4ASK":
+        case "4ASK":
             return _ask_symbols(b, 2)
         case "8ASK":
             return _ask_symbols(b, 3)
@@ -238,15 +192,27 @@ def map_symbols(mod: str, b: np.ndarray) -> np.ndarray:
         case "32QAM_RECT":
             return _qam_symbols(b, 3, 2)
         case "32QAM_CROSS":
-            return _cross_32qam_symbols(b)
+            return _cross_qam_symbols(
+                b, bits_per_symbol=5, grid_size=6, corner_levels_to_remove=1
+            )
         case "64QAM":
             return _qam_symbols(b, 3, 3)
         case "128QAM_RECT":
             return _qam_symbols(b, 4, 3)
         case "128QAM_CROSS":
-            return _cross_128qam_symbols(b)
+            return _cross_qam_symbols(
+                b, bits_per_symbol=7, grid_size=12, corner_levels_to_remove=2
+            )
         case "256QAM":
             return _qam_symbols(b, 4, 4)
+        case "512QAM_RECT":
+            return _qam_symbols(b, 5, 4)
+        case "512QAM_CROSS":
+            return _cross_qam_symbols(
+                b, bits_per_symbol=9, grid_size=24, corner_levels_to_remove=4
+            )
+        case "1024QAM":
+            return _qam_symbols(b, 5, 5)
         case _:
             raise ValueError(f"Unsupported modulation: {mod}")
 
@@ -260,6 +226,10 @@ def make_digital_burst(
     amplitude: float,
     span_symbols: int,
 ) -> np.ndarray:
+    modulation = normalize_modulation(modulation)
+
+    spec = get_modulation_spec(modulation)
+
     ratio = sample_rate / symbol_rate
     sps = round(ratio)
 
@@ -282,9 +252,9 @@ def make_digital_burst(
     rng = np.random.default_rng()
 
     if modulation in {"CPFSK", "GFSK", "GMSK"}:
-        b = bits(rng, nsyms)
+        b = bits(rng, nsyms * spec.bits_per_symbol)
         symbols = (2 * b.astype(np.float32)) - 1.0
-        gaussian_bt = {"GFSK": 0.35, "GMSK": 0.3}.get(modulation)
+        gaussian_bt = {"CPFSK": None, "GFSK": 0.35, "GMSK": 0.3}[modulation]
 
         return _cpfsk_like_burst(
             symbols=symbols,
@@ -295,31 +265,7 @@ def make_digital_burst(
             gaussian_bt=gaussian_bt,
         )
 
-    bps = {
-        "OOK": 1,
-        "PAM4": 2,
-        "4ASK": 2,
-        "8ASK": 3,
-        "BPSK": 1,
-        "QPSK": 2,
-        "OQPSK": 2,
-        "8PSK": 3,
-        "16PSK": 4,
-        "32PSK": 5,
-        "16APSK": 4,
-        "32APSK": 5,
-        "64APSK": 6,
-        "128APSK": 7,
-        "16QAM": 4,
-        "32QAM_RECT": 5,
-        "32QAM_CROSS": 5,
-        "64QAM": 6,
-        "128QAM_RECT": 7,
-        "128QAM_CROSS": 7,
-        "256QAM": 8,
-    }[modulation]
-
-    b = bits(rng, nsyms * bps)
+    b = bits(rng, nsyms * spec.bits_per_symbol)
     syms = map_symbols(modulation, b)
 
     taps = rrc_taps(rolloff, sps, span_symbols)

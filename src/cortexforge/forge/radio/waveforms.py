@@ -1,24 +1,6 @@
 from cortexforge.forge.radio.waveforms_analog import make_analog_burst
-from cortexforge.forge.radio.waveforms_numerique import make_digital_burst
-
-MODULATION_ALIASES = {
-    "32QAM": "32QAM_RECT",
-    "128QAM": "128QAM_RECT",
-    "4PAM": "PAM4",
-    "AM-DSB-WC": "AM-DSB-WC",
-    "AM-DSB-SC": "AM-DSB-SC",
-    "AM-SSB-WC": "AM-SSB-WC",
-    "AM-SSB-SC": "AM-SSB",
-}
-
-ANALOG_MODULATIONS = {
-    "AM-DSB",
-    "AM-DSB-WC",
-    "AM-DSB-SC",
-    "AM-SSB",
-    "AM-SSB-WC",
-    "FM",
-}
+from cortexforge.forge.radio.waveforms_digital import make_digital_burst
+from cortexforge.modulations import get_modulation_spec, normalize_modulation
 
 
 def make_burst(
@@ -30,8 +12,9 @@ def make_burst(
     amplitude: float,
     span_symbols: int = 11,
 ):
-    modulation = MODULATION_ALIASES.get(modulation.upper(), modulation.upper())
-    if modulation in ANALOG_MODULATIONS:
+    modulation = normalize_modulation(modulation)
+    spec = get_modulation_spec(modulation)
+    if spec.signal_type == "analog":
         return make_analog_burst(
             modulation=modulation,
             sample_rate=sample_rate,

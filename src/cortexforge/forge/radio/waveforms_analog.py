@@ -1,6 +1,6 @@
 import numpy as np
 
-from cortexforge.forge.radio.waveforms_numerique import rrc_taps
+from cortexforge.forge.radio.pulse_shaping import rrc_taps
 
 
 def _analytic_signal(x: np.ndarray) -> np.ndarray:
@@ -71,7 +71,7 @@ def make_analog_burst(
         burst = (carrier_leak + 0.5 * msg).astype(np.complex64)
     elif modulation == "AM-DSB-SC":
         burst = msg.astype(np.complex64)
-    elif modulation == "AM-SSB":
+    elif modulation == "AM-SSB-SC":
         burst = _analytic_signal(msg)
         peak = np.max(np.abs(burst))
         if peak > 0:
