@@ -69,7 +69,6 @@ def run(args) -> None:
         symbol_rates=args.tx_symbol_rates,
         roll_offs=args.tx_roll_offs,
         amplitudes=args.tx_amplitudes,
-        warmup_time=3.0,
     )
     df = scenario.generate_table(
         n_signals=args.n_signals,
