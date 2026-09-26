@@ -1,4 +1,4 @@
-"""CLI argument parser for CorteXForge planner."""
+"""CLI argument parser for CorteXforge planner."""
 
 from argparse import Action, ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 

@@ -1,4 +1,4 @@
-"""CLI argument parser for CorteXForge forge."""
+"""CLI argument parser for CorteXforge forge."""
 
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
