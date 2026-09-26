@@ -1,7 +1,6 @@
 import shutil
 from logging import getLogger
 from pathlib import Path
-from time import sleep
 
 from gnuradio import uhd
 
@@ -48,6 +47,7 @@ def main(args) -> None:
         rate=args.sample_rate,
         gain=args.gain,
         out_path=str(raw_path),
+        sample_count=args.sample_count,
     )
 
     cfg = SyncConfig(
@@ -81,43 +81,26 @@ def main(args) -> None:
 
     if hasattr(tb.src, "set_start_time"):
         tb.src.set_start_time(uhd.time_spec(capture_start_uhd))
-
         logger.info(
             "RX stream scheduled at UHD t=%.3f s",
             capture_start_uhd,
         )
 
-        rx_uhd_t0 = capture_start_uhd
-
     else:
-        rx_uhd_t0 = None
-        logger.warning("RX source has no set_start_time(); using runtime t0 estimate")
+        logger.warning("RX source has no set_start_time(); RX will start immediately")
 
+    logger.info("Recording %d IQ samples", args.sample_count)
     tb.start()
-
-    if rx_uhd_t0 is None:
-        rx_uhd_t0 = tb.src.get_time_now().get_real_secs()
-
-    capture_end_uhd = rx_uhd_t0 + args.duration
-
-    logger.info(
-        "Recording from UHD t=%.6f to t=%.6f",
-        rx_uhd_t0,
-        capture_end_uhd,
-    )
-
-    while tb.src.get_time_now().get_real_secs() < capture_end_uhd:
-        sleep(0.001)
-
-    tb.stop()
     tb.wait()
+
     tb.log_diagnostics(enabled=args.debug)
 
     logger.info("Recording completed.")
 
     actual_size = raw_path.stat().st_size
-    expected_size = int(args.duration * args.sample_rate) * 4
+    expected_size = args.sample_count * 4
 
+    logger.info("Expected samples: %d", args.sample_count)
     logger.info("Expected size: %d bytes", expected_size)
     logger.info("Actual size: %d bytes", actual_size)
 

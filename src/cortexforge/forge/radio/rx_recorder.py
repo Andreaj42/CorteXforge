@@ -12,7 +12,13 @@ class RxRecorder(gr.top_block):
     """
 
     def __init__(
-        self, usrp_args: str, freq: float, rate: float, gain: float, out_path: str
+        self,
+        usrp_args: str,
+        freq: float,
+        rate: float,
+        gain: float,
+        out_path: str,
+        sample_count: int,
     ) -> None:
         super().__init__("Rx Recorder")
 
@@ -32,6 +38,7 @@ class RxRecorder(gr.top_block):
         self._try_set_rx_agc(False)
         self.src.set_gain(gain, self.rx_channel)
         self.src.set_antenna("TX/RX", self.rx_channel)
+        self.head = blocks.head(gr.sizeof_short * 2, sample_count)
         self.sink = blocks.file_sink(gr.sizeof_short * 2, out_path, False)
         self.sink.set_unbuffered(False)
         self.rx_time_tags = blocks.tag_debug(
@@ -41,8 +48,9 @@ class RxRecorder(gr.top_block):
         )
         self.rx_time_tags.set_display(False)
         self.rx_time_tags.set_save_all(True)
-        self.connect(self.src, self.sink)
-        self.connect(self.src, self.rx_time_tags)
+        self.connect(self.src, self.head)
+        self.connect(self.head, self.sink)
+        self.connect(self.head, self.rx_time_tags)
 
     def _try_set_rx_agc(self, enable: bool = False) -> None:
         try:

@@ -28,7 +28,7 @@ def configure_parser(parser: ArgumentParser) -> ArgumentParser:
     )
     rx.add_argument("--gain", type=int, required=True, help="Receiver gain (dB)")
     rx.add_argument(
-        "--duration", type=int, required=True, help="Capture duration (seconds)"
+        "--sample-count", type=int, required=True, help="Number of IQ samples to record"
     )
     rx.add_argument("--timeline", type=Path, required=True, help="Path to timeline CSV")
     rx.add_argument(

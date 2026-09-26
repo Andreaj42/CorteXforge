@@ -91,7 +91,7 @@ def run(args) -> None:
         print_distribution(df, column)
 
     n_participants = len(args.rx_nodes) + len(args.tx_nodes)
-
+    rx_sample_count = int(args.duration * args.rx_sample_rate)
     generate_cortexlab_scenario(
         rx_nodes=args.rx_nodes,
         tx_nodes=args.tx_nodes,
@@ -100,7 +100,7 @@ def run(args) -> None:
         image="ghcr.io/andreaj42/cortexforge:latest",
         rx_command=(
             f'bash -lc "cortexforge forge rx '
-            f"--duration {args.duration} "
+            f"--sample-count {rx_sample_count} "
             f"--frequency {args.rx_frequency} "
             f"--gain {args.rx_gain} "
             f"--sample-rate {args.rx_sample_rate} "
