@@ -24,6 +24,7 @@ class RxRecorder(gr.top_block):
                 cpu_format="sc16", otw_format="sc16", channels=[self.rx_channel]
             ),
         )
+        self.requested_sample_rate = rate
         self.src.set_clock_source("external", self.rx_channel)
         self.src.set_time_source("external", self.rx_channel)
         self.src.set_samp_rate(rate)
