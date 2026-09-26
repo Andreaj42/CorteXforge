@@ -11,6 +11,15 @@ from cortexforge.utils.logger import setup_logger
 logger = setup_logger()
 
 
+def print_distribution(df, column: str) -> None:
+    counts = df[column].value_counts().sort_index()
+    ratios = counts / len(df)
+
+    print(f"\n{column}:")
+    for value in counts.index:
+        print(f"  {str(value):20s} {counts[value]:5d} ({100 * ratios[value]:6.2f}%)")
+
+
 def validate_nodes(
     rx_nodes: list[str],
     tx_nodes: list[str],
@@ -56,8 +65,11 @@ def run(args) -> None:
         tx_nodes=args.tx_nodes,
         duration=args.duration,
         rx_sample_rate=args.rx_sample_rate,
-        modulations=args.modulations,
-        warmup_time=4.0,
+        modulations=args.tx_modulations,
+        symbol_rates=args.tx_symbol_rates,
+        roll_offs=args.tx_roll_offs,
+        amplitudes=args.tx_amplitudes,
+        warmup_time=3.0,
     )
     df = scenario.generate_table(
         n_signals=args.n_signals,
@@ -67,20 +79,25 @@ def run(args) -> None:
         seed=args.seed,
     )
     print(df.head())
+    timeline_path = output_dir / "timeline.csv"
+    df.index.name = "id"
+    df.to_csv(timeline_path)
+    for column in [
+        "modulation",
+        "radio",
+        "amplitude",
+        "symbol_rate",
+        "roll_off",
+    ]:
+        print_distribution(df, column)
 
-    scenario.to_csv(
-        f"cxf/{experiment_id}/timeline.csv",
-        n_signals=args.n_signals,
-        allow_overlap=args.overlapping,
-        seed=args.seed,
-    )
     n_participants = len(args.rx_nodes) + len(args.tx_nodes)
 
     generate_cortexlab_scenario(
         rx_nodes=args.rx_nodes,
         tx_nodes=args.tx_nodes,
         sync_node=args.sync_node,
-        duration=2 * args.duration,
+        duration=len(args.rx_nodes) * args.duration,
         image="ghcr.io/andreaj42/cortexforge:latest",
         rx_command=(
             f'bash -lc "cortexforge forge rx '
@@ -89,12 +106,12 @@ def run(args) -> None:
             f"--gain {args.rx_gain} "
             f"--sample-rate {args.rx_sample_rate} "
             f"--output-path /cortexlab/homes/{args.username}/out/{experiment_id}/ "
-            f"--timeline /cortexlab/homes/{args.username}/cxf/timeline.csv "
+            f"--timeline /cortexlab/homes/{args.username}/cxf/{experiment_id}/timeline.csv "
             f'--sync-node {args.sync_node}"'
         ),
         tx_command=(
             f'bash -lc "cortexforge forge tx '
-            f"--timeline /cortexlab/homes/{args.username}/cxf/timeline.csv "
+            f"--timeline /cortexlab/homes/{args.username}/cxf/{experiment_id}/timeline.csv "
             f"--sync-node {args.sync_node} "
             f"--gain {args.tx_gain} "
             f'--frequency {args.tx_frequency}"'

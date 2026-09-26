@@ -1,0 +1,25 @@
+DEFAULT_TX_AMPLITUDES = (
+    0.30,
+    0.45,
+    0.60,
+    0.75,
+    0.90,
+)
+
+DEFAULT_TX_SYMBOL_RATES = (
+    250_000,
+    500_000,
+    1_000_000,
+    1_250_000,
+)
+
+DEFAULT_TX_ROLL_OFFS = (
+    0.10,
+    0.20,
+    0.35,
+    0.50,
+)
+
+DEFAULT_TX_SAMPLE_RATE = 10_000_000
+DEFAULT_MIN_BURST_GAP_S = 0.002
+DEFAULT_WARMUP_TIME_S = 3.0

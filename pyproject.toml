@@ -28,7 +28,12 @@ planner = [
 forge = [
   "sigmf==1.2.12"
 ]
-
+dev = [
+  "pytest==9.1.1",
+]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
 
 [project.scripts]
 cortexforge = "cortexforge.cli:main"

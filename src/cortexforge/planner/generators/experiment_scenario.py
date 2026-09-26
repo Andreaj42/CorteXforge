@@ -1,6 +1,5 @@
 import random
 from collections.abc import Sequence
-from itertools import product
 
 import pandas as pd
 
@@ -9,14 +8,14 @@ from cortexforge.modulations import SUPPORTED_MODULATIONS, normalize_modulations
 
 class ExperimentScenario:
     """
-    Generate a pseudo-random experiment schedule as a CSV.
+    Generate a pseudo-random experiment schedule.
 
     Constraints:
     - Signals start no earlier than warmup_time.
     - Signals must end before or at the total experiment duration.
     - Non-overlapping signals are separated by min_burst_gap_s.
-    - Modulations are evenly distributed across generated signals.
-    - The receiver node and its params are fixed for the whole experiment.
+    - Signal parameters are independently sampled from discrete candidate sets.
+    - The receiver configuration is fixed for the whole experiment.
     """
 
     def __init__(
@@ -25,7 +24,7 @@ class ExperimentScenario:
         duration: float,
         rx_sample_rate: int,
         warmup_time: float = 4.0,
-        amplitude_range: tuple[float, float] = (0.3, 0.9),
+        amplitudes: Sequence[float] | None = None,
         modulations: list[str] | None = None,
         symbol_rates: Sequence[float] | None = None,
         roll_offs: Sequence[float] | None = None,
@@ -49,37 +48,15 @@ class ExperimentScenario:
         self.duration = duration
         self.rx_sample_rate = rx_sample_rate
         self.warmup_time = warmup_time
-        self.amplitude_range = amplitude_range
         self.min_burst_gap_s = min_burst_gap_s
 
         selected_modulations = (
             SUPPORTED_MODULATIONS if modulations is None else modulations
         )
         self.modulations = self._validate_modulations(selected_modulations)
-
-        self.symbol_rates = list(
-            symbol_rates
-            if symbol_rates is not None
-            else [
-                250_000,
-                312_500,
-                500_000,
-                625_000,
-                1_000_000,
-                1_250_000,
-            ]
-        )
-
-        self.roll_offs = list(
-            roll_offs
-            if roll_offs is not None
-            else [
-                0.10,
-                0.20,
-                0.35,
-                0.50,
-            ]
-        )
+        self.amplitudes = list(amplitudes)
+        self.symbol_rates = list(symbol_rates)
+        self.roll_offs = list(roll_offs)
 
         self.tx_sample_rate = tx_sample_rate
 
@@ -88,6 +65,24 @@ class ExperimentScenario:
         self._validate_signal_parameters()
 
     def _validate_signal_parameters(self) -> None:
+        if not self.amplitudes:
+            raise ValueError("At least one amplitude must be provided.")
+
+        if len(set(self.amplitudes)) != len(self.amplitudes):
+            raise ValueError("Amplitude values must be unique.")
+
+        if len(set(self.symbol_rates)) != len(self.symbol_rates):
+            raise ValueError("Symbol-rate values must be unique.")
+
+        if len(set(self.roll_offs)) != len(self.roll_offs):
+            raise ValueError("Roll-off values must be unique.")
+
+        for amplitude in self.amplitudes:
+            if not 0.0 < amplitude <= 1.0:
+                raise ValueError(
+                    f"Invalid amplitude {amplitude}: values must belong to (0, 1]."
+                )
+
         if not self.symbol_rates:
             raise ValueError("At least one symbol rate must be provided.")
 
@@ -113,6 +108,16 @@ class ExperimentScenario:
                     "which is too small."
                 )
 
+            if "OQPSK" in self.modulations:
+                for symbol_rate in self.symbol_rates:
+                    sps = round(self.tx_sample_rate / symbol_rate)
+
+                    if sps % 2 != 0:
+                        raise ValueError(
+                            f"OQPSK requires an even SPS, but Rs={symbol_rate} "
+                            f"gives SPS={sps}."
+                        )
+
         for roll_off in self.roll_offs:
             if not 0.0 <= roll_off <= 1.0:
                 raise ValueError("Roll-off values must belong to [0, 1].")
@@ -128,6 +133,43 @@ class ExperimentScenario:
                         f"which does not fit inside "
                         f"RX Fs={self.rx_sample_rate} Hz."
                     )
+
+    def _sample_parameter_sequence(
+        self,
+        n_signals: int,
+        rng: random.Random,
+    ) -> list[tuple[str, str, float, float, float, float]]:
+        """
+        Sample signal configurations independently from discrete parameter sets.
+
+        Returns tuples:
+            (
+                modulation,
+                tx_node,
+                amplitude,
+                symbol_rate,
+                roll_off,
+                duration_s,
+            )
+        """
+        if n_signals <= 0:
+            raise ValueError("n_signals must be strictly positive.")
+
+        sequence = []
+
+        for _ in range(n_signals):
+            sequence.append(
+                (
+                    rng.choice(self.modulations),
+                    rng.choice(self.tx_nodes),
+                    rng.choice(self.amplitudes),
+                    rng.choice(self.symbol_rates),
+                    rng.choice(self.roll_offs),
+                    round(rng.uniform(*self.duration_range_s), 6),
+                )
+            )
+
+        return sequence
 
     @staticmethod
     def _validate_modulations(modulations: list[str]) -> list[str]:
@@ -184,38 +226,6 @@ class ExperimentScenario:
             "reducing min_burst_gap_s, or increasing the experiment duration."
         )
 
-    def _balanced_parameter_sequence(
-        self,
-        n_signals: int,
-        rng: random.Random,
-    ) -> list[tuple[str, int, float]]:
-        if n_signals <= 0:
-            raise ValueError("n_signals must be strictly positive.")
-
-        combinations = list(
-            product(
-                self.modulations,
-                self.symbol_rates,
-                self.roll_offs,
-            )
-        )
-
-        n_combinations = len(combinations)
-
-        if n_signals % n_combinations != 0:
-            raise ValueError(
-                "n_signals must be a multiple of the total number "
-                "of (modulation, symbol_rate, roll_off) combinations "
-                f"({n_combinations})."
-            )
-
-        repetitions = n_signals // n_combinations
-
-        sequence = combinations * repetitions
-        rng.shuffle(sequence)
-
-        return sequence
-
     def generate_table(
         self,
         n_signals: int,
@@ -228,33 +238,43 @@ class ExperimentScenario:
         Generate a pandas DataFrame with the experiment timeline.
 
         Args:
-            n_signals: Number of signals to generate. Must be a multiple of the
-                selected modulation count.
+            n_signals: Number of signals to generate.
             allow_overlap: If False, generated signals will not overlap and will
                 keep at least min_burst_gap_s between bursts.
             seed: Optional seed for reproducibility.
         """
-        rng = random.Random(seed)
+        parameter_rng = random.Random(seed)
 
-        signal_parameters = self._balanced_parameter_sequence(n_signals, rng)
+        timing_rng = random.Random(None if seed is None else seed + 1)
+
+        signal_parameters = self._sample_parameter_sequence(n_signals, parameter_rng)
 
         rows = []
         scheduled_intervals = []
 
-        for signal_modulation, signal_symbol_rate, signal_roll_off in signal_parameters:
-            signal_node = rng.choice(self.tx_nodes)
-            signal_duration = round(rng.uniform(*self.duration_range_s), 6)
-            signal_amplitude = round(rng.uniform(*self.amplitude_range), 2)
+        for (
+            signal_modulation,
+            signal_node,
+            signal_amplitude,
+            signal_symbol_rate,
+            signal_roll_off,
+            signal_duration,
+        ) in signal_parameters:
             if allow_overlap:
                 signal_start_time = round(
-                    rng.uniform(self.warmup_time, self.duration - signal_duration), 6
+                    timing_rng.uniform(
+                        self.warmup_time,
+                        self.duration - signal_duration,
+                    ),
+                    6,
                 )
             else:
                 signal_start_time = self._find_non_overlapping_start(
                     signal_duration=signal_duration,
                     scheduled_intervals=scheduled_intervals,
-                    rng=rng,
+                    rng=timing_rng,
                 )
+
                 scheduled_intervals.append((signal_start_time, signal_duration))
 
             rows.append(
