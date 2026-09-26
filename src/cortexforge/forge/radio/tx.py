@@ -42,7 +42,8 @@ def main(args):
 
         logger.info(
             f"event start={ev['start_time_s']} dur={ev['duration_s']} "
-            f"modulation={ev['modulation']}"
+            f"modulation={ev['modulation']} symbol_rate={ev['symbol_rate']} "
+            f"roll_off={ev['roll_off']} amplitude={ev['amplitude']}"
         )
 
     tb = TxTimeline(
