@@ -43,6 +43,11 @@ def configure_parser(parser: ArgumentParser) -> ArgumentParser:
             "(e.g. /cortexlab/homes/<username>/out/<expriment-id>)"
         ),
     )
+    rx.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable detailed RX diagnostics",
+    )
 
     tx = sub.add_parser("tx", help="Transmitter")
     tx.add_argument("--timeline", type=Path, required=True, help="Path to timeline CSV")

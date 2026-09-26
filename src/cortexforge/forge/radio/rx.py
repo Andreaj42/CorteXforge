@@ -4,7 +4,6 @@ from logging import getLogger
 from pathlib import Path
 from time import sleep
 
-import pmt
 from gnuradio import uhd
 
 from cortexforge.forge.radio.rx_recorder import RxRecorder
@@ -51,13 +50,7 @@ def main(args) -> None:
         gain=args.gain,
         out_path=str(raw_path),
     )
-    actual_sample_rate = tb.src.get_samp_rate()
-
-    logger.info(
-        "RX sample rate: requested=%.0f Sps, actual=%.0f Sps",
-        args.sample_rate,
-        actual_sample_rate,
-    )
+    tb.log_diagnostics(enabled=args.debug)
 
     cfg = SyncConfig(
         server_host=args.sync_node,
@@ -120,17 +113,6 @@ def main(args) -> None:
 
     tb.stop()
     tb.wait()
-    rx_time_tags = list(tb.rx_time_tags.current_tags())
-
-    for tag in rx_time_tags:
-        seconds = pmt.to_uint64(pmt.tuple_ref(tag.value, 0))
-        fraction = pmt.to_double(pmt.tuple_ref(tag.value, 1))
-
-        logger.info(
-            "RX time: sample=%d, UHD t=%.9f s",
-            tag.offset,
-            seconds + fraction,
-        )
 
     logger.info("Recording completed.")
 
