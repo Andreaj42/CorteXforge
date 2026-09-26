@@ -44,13 +44,12 @@ def main(args) -> None:
     timeline = load_timeline(args.timeline)
 
     tb = RxRecorder(
-        usrp_args="ignore-cal-file=1",
+        usrp_args=("ignore-cal-file=1,clock_source=external,time_source=external"),
         freq=args.frequency,
         rate=args.sample_rate,
         gain=args.gain,
         out_path=str(raw_path),
     )
-    tb.log_diagnostics(enabled=args.debug)
 
     cfg = SyncConfig(
         server_host=args.sync_node,
@@ -113,6 +112,7 @@ def main(args) -> None:
 
     tb.stop()
     tb.wait()
+    tb.log_diagnostics(enabled=args.debug)
 
     logger.info("Recording completed.")
 
