@@ -4,6 +4,11 @@ from collections.abc import Sequence
 import pandas as pd
 
 from cortexforge.modulations import SUPPORTED_MODULATIONS, normalize_modulations
+from cortexforge.planner.defaults import (
+    DEFAULT_MIN_BURST_GAP_S,
+    DEFAULT_TX_SAMPLE_RATE,
+    DEFAULT_WARMUP_TIME_S,
+)
 
 
 class ExperimentScenario:
@@ -23,13 +28,13 @@ class ExperimentScenario:
         tx_nodes: list[str],
         duration: float,
         rx_sample_rate: int,
-        warmup_time: float = 4.0,
-        amplitudes: Sequence[float] | None = None,
+        amplitudes: Sequence[float],
+        symbol_rates: Sequence[float],
+        roll_offs: Sequence[float],
         modulations: list[str] | None = None,
-        symbol_rates: Sequence[float] | None = None,
-        roll_offs: Sequence[float] | None = None,
-        tx_sample_rate: int = 10_000_000,
-        min_burst_gap_s: float = 0.002,
+        warmup_time: float = DEFAULT_WARMUP_TIME_S,
+        tx_sample_rate: int = DEFAULT_TX_SAMPLE_RATE,
+        min_burst_gap_s: float = DEFAULT_MIN_BURST_GAP_S,
     ):
         if not tx_nodes:
             raise ValueError("At least one transmitter node must be provided.")
@@ -104,19 +109,13 @@ class ExperimentScenario:
 
             if sps < 2:
                 raise ValueError(
-                    f"Symbol rate {symbol_rate} gives SPS={sps:.0f}, "
-                    "which is too small."
+                    f"Symbol rate {symbol_rate} gives SPS={sps:.0f}, which is too small."
                 )
 
-            if "OQPSK" in self.modulations:
-                for symbol_rate in self.symbol_rates:
-                    sps = round(self.tx_sample_rate / symbol_rate)
-
-                    if sps % 2 != 0:
-                        raise ValueError(
-                            f"OQPSK requires an even SPS, but Rs={symbol_rate} "
-                            f"gives SPS={sps}."
-                        )
+            if "OQPSK" in self.modulations and int(sps) % 2 != 0:
+                raise ValueError(
+                    f"OQPSK requires an even SPS, but Rs={symbol_rate} gives SPS={sps}."
+                )
 
         for roll_off in self.roll_offs:
             if not 0.0 <= roll_off <= 1.0:
@@ -310,21 +309,3 @@ class ExperimentScenario:
 
         df = df.sort_values("start_time").reset_index(drop=True)
         return df
-
-    def to_csv(
-        self,
-        output_path: str,
-        n_signals: int,
-        allow_overlap: bool = False,
-        seed: int | None = None,
-    ):
-        """
-        Generate the table and write it directly to a CSV file.
-        """
-        df = self.generate_table(
-            n_signals=n_signals,
-            allow_overlap=allow_overlap,
-            seed=seed,
-        )
-        df.index.name = "id"
-        df.to_csv(output_path)
