@@ -1,5 +1,4 @@
 import shutil
-from datetime import datetime, timezone
 from logging import getLogger
 from pathlib import Path
 from time import sleep
@@ -39,7 +38,7 @@ def main(args) -> None:
 
     logger.info("Starting receiver on node %s", node_name)
 
-    final_out_dir = args.output_path / node_name
+    final_out_dir = args.output_path
 
     timeline = load_timeline(args.timeline)
 
@@ -137,8 +136,7 @@ def main(args) -> None:
 
     logger.info("Recording stats: %s", stats)
 
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    local_base_path = local_dir / stamp
+    local_base_path = local_dir / f"record_{node_name}"
 
     annotations = timeline_to_sigmf_annotations(
         events=timeline,
