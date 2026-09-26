@@ -17,7 +17,7 @@ def print_distribution(df, column: str) -> None:
 
     print(f"\n{column}:")
     for value in counts.index:
-        print(f"  {str(value):20s} {counts[value]:5d} ({100 * ratios[value]:6.2f}%)")
+        print(f"  {value!s:20} {counts[value]:5d} ({100 * ratios[value]:6.2f}%)")
 
 
 def validate_nodes(
