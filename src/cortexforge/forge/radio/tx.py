@@ -7,7 +7,10 @@ from cortexforge.forge.utils.load_timeline import load_timeline
 from cortexforge.forge.utils.node_identity import get_node_name
 from cortexforge.forge.utils.sync_barrier.sync_barrier_client import SyncBarrierClient
 from cortexforge.forge.utils.sync_barrier.sync_config import SyncConfig
-from cortexforge.forge.utils.uhd_time import arm_time_reset_next_pps
+from cortexforge.forge.utils.uhd_time import (
+    CAPTURE_START_UHD_S,
+    arm_time_reset_next_pps,
+)
 
 logger = getLogger(__name__)
 
@@ -48,6 +51,7 @@ def main(args):
         center_freq=args.frequency,
         gain=args.gain,
         events_with_iq=events_with_iq,
+        time_offset_s=CAPTURE_START_UHD_S,
     )
 
     cfg = SyncConfig(
@@ -71,7 +75,12 @@ def main(args):
     # logger.info(f"UHD time at start: {tb.sink.get_time_now().get_real_secs():.6f} s")
 
     last_ev = max(events_with_iq, key=lambda e: e["start_time_s"] + e["duration_s"])
-    t_end = float(last_ev["start_time_s"] + last_ev["duration_s"]) + 1.0
+    t_end = (
+        CAPTURE_START_UHD_S
+        + 1.0
+        + float(last_ev["start_time_s"])
+        + float(last_ev["duration_s"])
+    )
 
     while tb.sink.get_time_now().get_real_secs() < t_end:
         time.sleep(0.001)

@@ -13,7 +13,7 @@ class BurstScheduler(gr.sync_block):
     - tx_eob au dernier sample
     """
 
-    def __init__(self, events, sample_rate, amplitude_scale=1.0):
+    def __init__(self, events, sample_rate, time_offset_s=0.0, amplitude_scale=1.0):
         gr.sync_block.__init__(
             self,
             name="BurstScheduler",
@@ -22,13 +22,14 @@ class BurstScheduler(gr.sync_block):
         )
         self.events = list(events)
         self.fs = float(sample_rate)
+        self.time_offset_s = float(time_offset_s)
         self.amp_scale = float(amplitude_scale)
 
         # Pré-génère tous les bursts
         self.bursts = []
         for ev in self.events:
             iq = ev["iq"].astype(np.complex64) * self.amp_scale
-            t0 = float(ev["start_time_s"])
+            t0 = float(ev["start_time_s"]) + self.time_offset_s
             self.bursts.append((t0, iq))
 
         self.cur_idx = 0
@@ -87,7 +88,9 @@ class BurstScheduler(gr.sync_block):
 
 
 class TxTimeline(gr.top_block):
-    def __init__(self, usrp_args, rate, center_freq, gain, events_with_iq):
+    def __init__(
+        self, usrp_args, rate, center_freq, gain, events_with_iq, time_offset_s=0.0
+    ):
         super().__init__("TxTimeline")
 
         self.sink = uhd.usrp_sink(
@@ -103,6 +106,8 @@ class TxTimeline(gr.top_block):
         self.sink.set_gain(gain, 0)
         self.sink.set_antenna("TX/RX", 0)
 
-        self.src = BurstScheduler(events_with_iq, sample_rate=rate)
+        self.src = BurstScheduler(
+            events_with_iq, sample_rate=rate, time_offset_s=time_offset_s
+        )
 
         self.connect(self.src, self.sink)

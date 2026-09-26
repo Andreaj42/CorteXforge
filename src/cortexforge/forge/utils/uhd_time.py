@@ -2,6 +2,8 @@ import time
 
 from gnuradio import uhd
 
+CAPTURE_START_UHD_S = 1.0
+
 
 def wait_for_pps_edge(usrp_block, poll_s=0.0001):
     last = usrp_block.get_time_last_pps().get_real_secs()

@@ -16,7 +16,10 @@ from cortexforge.forge.utils.sigmf.sigmf_annotations import (
 from cortexforge.forge.utils.sigmf_writer import write_sigmf
 from cortexforge.forge.utils.sync_barrier.sync_barrier_client import SyncBarrierClient
 from cortexforge.forge.utils.sync_barrier.sync_config import SyncConfig
-from cortexforge.forge.utils.uhd_time import arm_time_reset_next_pps
+from cortexforge.forge.utils.uhd_time import (
+    CAPTURE_START_UHD_S,
+    arm_time_reset_next_pps,
+)
 
 logger = getLogger(__name__)
 
@@ -75,7 +78,7 @@ def main(args) -> None:
     # Reset UHD time to zero on the next PPS edge.
     arm_time_reset_next_pps(tb.src)
 
-    capture_start_uhd = 1.0
+    capture_start_uhd = CAPTURE_START_UHD_S
 
     if hasattr(tb.src, "set_start_time"):
         tb.src.set_start_time(uhd.time_spec(capture_start_uhd))
@@ -140,7 +143,6 @@ def main(args) -> None:
         events=timeline,
         rx_sample_rate=args.sample_rate,
         rx_center_frequency=args.frequency,
-        rx_uhd_t0=rx_uhd_t0,
         rx_data_path=str(raw_path),
         baseline_stat=stats,
     )

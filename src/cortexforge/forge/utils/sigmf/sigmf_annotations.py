@@ -36,7 +36,6 @@ def timeline_to_sigmf_annotations(
     events,
     rx_sample_rate,
     rx_center_frequency,
-    rx_uhd_t0,
     rx_data_path=None,
     baseline_stat=None,
 ):
@@ -50,9 +49,9 @@ def timeline_to_sigmf_annotations(
     baseline_cache = {}
 
     for ev in events:
-        start = int((ev["start_time_s"] - rx_uhd_t0) * rx_sample_rate)
+        start = round(ev["start_time_s"] * rx_sample_rate)
 
-        count = int(ev["duration_s"] * rx_sample_rate)
+        count = round(ev["duration_s"] * rx_sample_rate)
 
         modulation = ev["modulation"].upper()
 
