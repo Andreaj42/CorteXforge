@@ -27,9 +27,6 @@ MODULATION_SPECS: dict[str, ModulationSpec] = {
     "32APSK": ModulationSpec(signal_type="digital", bits_per_symbol=5),
     "64APSK": ModulationSpec(signal_type="digital", bits_per_symbol=6),
     "128APSK": ModulationSpec(signal_type="digital", bits_per_symbol=7),
-    "256APSK": ModulationSpec(signal_type="digital", bits_per_symbol=8),
-    "512APSK": ModulationSpec(signal_type="digital", bits_per_symbol=9),
-    "1024APSK": ModulationSpec(signal_type="digital", bits_per_symbol=10),
     "16QAM": ModulationSpec(
         signal_type="digital", constellation_shape="square", bits_per_symbol=4
     ),
