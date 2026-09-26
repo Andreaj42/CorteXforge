@@ -50,6 +50,13 @@ def main(args) -> None:
         gain=args.gain,
         out_path=str(raw_path),
     )
+    actual_sample_rate = tb.src.get_samp_rate()
+
+    logger.info(
+        "RX sample rate: requested=%.0f Sps, actual=%.0f Sps",
+        args.sample_rate,
+        actual_sample_rate,
+    )
 
     cfg = SyncConfig(
         server_host=args.sync_node,
@@ -112,6 +119,12 @@ def main(args) -> None:
 
     tb.stop()
     tb.wait()
+    rx_time_tags = list(tb.rx_time_tags.current_tags())
+
+    logger.info(
+        "RX time tags: %s",
+        rx_time_tags,
+    )
 
     logger.info("Recording completed.")
 

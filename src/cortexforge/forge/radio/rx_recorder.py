@@ -32,7 +32,15 @@ class RxRecorder(gr.top_block):
         self.src.set_antenna("TX/RX", self.rx_channel)
         self.sink = blocks.file_sink(gr.sizeof_short * 2, out_path, False)
         self.sink.set_unbuffered(False)
+        self.rx_time_tags = blocks.tag_debug(
+            gr.sizeof_short * 2,
+            "rx_time",
+            "rx_time",
+        )
+        self.rx_time_tags.set_display(False)
+        self.rx_time_tags.set_save_all(True)
         self.connect(self.src, self.sink)
+        self.connect(self.src, self.rx_time_tags)
 
     def _try_set_rx_agc(self, enable: bool = False) -> None:
         try:
