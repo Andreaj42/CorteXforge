@@ -91,7 +91,7 @@ def run(args) -> None:
         print_distribution(df, column)
 
     n_participants = len(args.rx_nodes) + len(args.tx_nodes)
-    rx_sample_count = int(args.duration * args.rx_sample_rate)
+    rx_sample_count = args.duration * args.rx_sample_rate
     generate_cortexlab_scenario(
         rx_nodes=args.rx_nodes,
         tx_nodes=args.tx_nodes,
