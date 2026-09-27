@@ -93,9 +93,19 @@ def main(args) -> None:
     tb.start()
     tb.wait()
 
+    overflow_offsets = tb.get_overflow_offsets()
+
     tb.log_diagnostics(enabled=args.debug)
 
     logger.info("Recording completed.")
+
+    if overflow_offsets:
+        logger.error(
+            "RX overflow detected at sample offsets %s. Capture discarded.",
+            overflow_offsets,
+        )
+        shutil.rmtree(local_dir)
+        return
 
     actual_size = raw_path.stat().st_size
     expected_size = args.sample_count * 4

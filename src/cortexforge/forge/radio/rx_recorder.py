@@ -58,6 +58,10 @@ class RxRecorder(gr.top_block):
         except RuntimeError as e:
             logger.warning("RX AGC not supported by this radio; msg: %s", str(e))
 
+    def get_overflow_offsets(self) -> list[int]:
+        tags = list(self.rx_time_tags.current_tags())
+        return [tag.offset for tag in tags[1:]]
+
     def log_diagnostics(self, enabled: bool = False) -> None:
         if not enabled:
             return
