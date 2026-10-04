@@ -225,6 +225,7 @@ def make_digital_burst(
     rolloff: float,
     amplitude: float,
     span_symbols: int,
+    seed: int | None = None,
 ) -> np.ndarray:
     modulation = normalize_modulation(modulation)
 
@@ -249,7 +250,7 @@ def make_digital_burst(
     nsamp = round(duration_s * sample_rate)
     nsyms = int(np.ceil(nsamp / sps))
 
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(seed)
 
     if modulation in {"CPFSK", "GFSK", "GMSK"}:
         b = bits(rng, nsyms * spec.bits_per_symbol)

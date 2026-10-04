@@ -25,6 +25,7 @@ def _make_message(
     duration_s: float,
     rolloff: float,
     span_symbols: int,
+    rng: np.random.Generator,
 ) -> np.ndarray:
     sps = round(sample_rate / symbol_rate)
     if sps < 2:
@@ -35,7 +36,6 @@ def _make_message(
     nsamp = round(duration_s * sample_rate)
     nsyms = int(np.ceil(nsamp / sps))
 
-    rng = np.random.default_rng()
     msg_syms = rng.uniform(-1.0, 1.0, size=nsyms).astype(np.float32)
 
     up = np.zeros(nsyms * sps, dtype=np.float32)
@@ -57,13 +57,16 @@ def make_analog_burst(
     rolloff: float,
     amplitude: float,
     span_symbols: int,
+    seed: int | None = None,
 ) -> np.ndarray:
+    rng = np.random.default_rng(seed)
     msg = _make_message(
         sample_rate=sample_rate,
         symbol_rate=symbol_rate,
         duration_s=duration_s,
         rolloff=rolloff,
         span_symbols=span_symbols,
+        rng=rng,
     )
 
     if modulation in {"AM-DSB", "AM-DSB-WC"}:

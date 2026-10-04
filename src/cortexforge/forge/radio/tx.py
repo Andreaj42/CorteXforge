@@ -34,6 +34,7 @@ def main(args):
             duration_s=ev["duration_s"],
             rolloff=ev["roll_off"],
             amplitude=ev["amplitude"],
+            seed=ev["waveform_seed"],
         ).astype("complex64")
 
         ev2 = dict(ev)

@@ -27,6 +27,7 @@ def load_timeline(path: str) -> list[dict[str, Any]]:
                 "modulation": row["modulation"],
                 "symbol_rate": float(row["symbol_rate"]),
                 "roll_off": float(row["roll_off"]),
+                "waveform_seed": int(row["waveform_seed"]),
             }
             events.append(event)
 

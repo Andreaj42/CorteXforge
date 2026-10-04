@@ -5,6 +5,7 @@ import pandas as pd
 
 from cortexforge.modulations import SUPPORTED_MODULATIONS, normalize_modulations
 from cortexforge.planner.defaults import (
+    DEFAULT_BURST_DURATION_RANGE_S,
     DEFAULT_MIN_BURST_GAP_S,
     DEFAULT_TX_SAMPLE_RATE,
     DEFAULT_WARMUP_TIME_S,
@@ -65,7 +66,7 @@ class ExperimentScenario:
 
         self.tx_sample_rate = tx_sample_rate
 
-        self.duration_range_s = (0.01, 0.03)
+        self.burst_duration_range_s = DEFAULT_BURST_DURATION_RANGE_S
 
         self._validate_signal_parameters()
 
@@ -164,10 +165,9 @@ class ExperimentScenario:
                     rng.choice(self.amplitudes),
                     rng.choice(self.symbol_rates),
                     rng.choice(self.roll_offs),
-                    round(rng.uniform(*self.duration_range_s), 6),
+                    round(rng.uniform(*self.burst_duration_range_s), 6),
                 )
             )
-
         return sequence
 
     @staticmethod
@@ -243,8 +243,8 @@ class ExperimentScenario:
             seed: Optional seed for reproducibility.
         """
         parameter_rng = random.Random(seed)
-
         timing_rng = random.Random(None if seed is None else seed + 1)
+        waveform_rng = random.Random(None if seed is None else seed + 2)
 
         signal_parameters = self._sample_parameter_sequence(n_signals, parameter_rng)
 
@@ -288,6 +288,7 @@ class ExperimentScenario:
                     "roll_off": signal_roll_off,
                     "symbol_rate": signal_symbol_rate,
                     "sample_rate_sps": self.tx_sample_rate,
+                    "waveform_seed": waveform_rng.getrandbits(32),
                 }
             )
 
@@ -304,6 +305,7 @@ class ExperimentScenario:
                 "roll_off",
                 "symbol_rate",
                 "sample_rate_sps",
+                "waveform_seed",
             ],
         )
 

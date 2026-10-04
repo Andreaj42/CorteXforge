@@ -11,6 +11,7 @@ def make_burst(
     rolloff: float,
     amplitude: float,
     span_symbols: int = 11,
+    seed: int | None = None,
 ):
     modulation = normalize_modulation(modulation)
     spec = get_modulation_spec(modulation)
@@ -23,6 +24,7 @@ def make_burst(
             rolloff=rolloff,
             amplitude=amplitude,
             span_symbols=span_symbols,
+            seed=seed,
         )
 
     return make_digital_burst(
@@ -33,4 +35,5 @@ def make_burst(
         rolloff=rolloff,
         amplitude=amplitude,
         span_symbols=span_symbols,
+        seed=seed,
     )
