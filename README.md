@@ -10,6 +10,12 @@ This project is organized into three main components:
 - Experiment execution: this part deploys and executes the generated experiment definitions (`timeline.csv`) directly on the [SLICES-RI/CorteXlab](https://www.cortexlab.fr/doku.php?id=start) nodes.
 - Dataset API: this part provides easy access to pre-generated datasets created with CorteXforge.
 
+## Versioning
+
+CorteXforge follows semantic versioning.
+
+Version 1.0 defines the first stable release of the documented command-line interface and experiment workflow. Internal Python APIs may continue to evolve within the 1.x series unless explicitly documented as public.
+
 ## Architecture
 
 CorteXforge separates experiment planning from execution. The **Planner** generates the RF transmission timeline and the CorteXlab deployment scenario, while **Forge** executes the experiment across dedicated transmitter, receiver, and synchronization nodes.

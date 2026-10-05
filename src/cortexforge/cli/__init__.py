@@ -1,4 +1,4 @@
-"""Unified CLI entrypoint for CorteXForge."""
+"""Unified CLI entrypoint for CorteXforge."""
 
 from argparse import ArgumentParser, Namespace
 
@@ -9,11 +9,11 @@ from cortexforge.cli.planner import configure_parser as configure_planner_parser
 
 def build_parser() -> ArgumentParser:
     """Build the root CLI parser."""
-    parser = ArgumentParser(prog="cortexforge", description="CorteXForge command line")
+    parser = ArgumentParser(prog="cortexforge", description="CorteXforge command line")
     sub = parser.add_subparsers(
         dest="command",
         required=True,
-        help="CorteXForge subcommand",
+        help="CorteXforge subcommand",
     )
 
     configure_planner_parser(

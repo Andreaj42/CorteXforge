@@ -13,7 +13,7 @@ from .manifest import load_manifest
 
 REGISTRY_PATH = Path(__file__).with_name("registry.json")
 DOWNLOAD_HEADERS = {
-    "User-Agent": "CorteXForge/0.1 (+https://github.com/Andreaj42/CorteXForge)",
+    "User-Agent": "CorteXforge/1.0 (+https://github.com/Andreaj42/CorteXforge)",
     "Accept": "*/*",
 }
 logger = logging.getLogger(__name__)
