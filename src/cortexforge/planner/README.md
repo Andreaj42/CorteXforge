@@ -10,7 +10,7 @@ The scenario generator can be executed locally before  deployment in Slices/Cort
 - time of recording (in seconds)
 
 ### Example usage
-- ```git clone https://github.com/Andreaj42/CorteXForge.git```
+- ```git clone https://github.com/Andreaj42/CorteXforge.git```
 - ```python3.13 -m venv .venv```
 - ```source .venv/bin/activate```
 - ```pip install -e .```

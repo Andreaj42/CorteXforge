@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use CorteXforge in your research, please cite the software using the metadata below."
+
+title: "CorteXforge"
+type: software
+
+authors:
+  - family-names: "Joly"
+    given-names: "Andréa"
+    affiliation: "Inria, INSA Lyon, CITI"
+
+version: "1.0.0"
+
+repository-code: "https://github.com/Andreaj42/CorteXforge"
+
+abstract: >
+  CorteXforge is an end-to-end framework for planning, executing, and accessing reproducible radio dataset experiments on the SLICES-RI/CorteXlab testbed.
+
+keywords:
+  - radio datasets
+  - software-defined radio
+  - automatic modulation classification
+  - reproducible experiments
+  - CorteXlab
+  - SigMF
+
+license: "BSD-3-Clause"
