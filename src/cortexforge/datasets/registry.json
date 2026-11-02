@@ -1,17 +1,4 @@
 {
-  "awgn_single": {
-    "latest": "1.0.0",
-    "versions": {
-      "1.0.0": {
-        "url": "https://cortexforge.andrea-joly.fr/awgn_single-1.0.0.tar.zst",
-        "archive_name": "awgn_single-1.0.0.tar.zst",
-        "root_dir": "awgn_single/1.0.0",
-        "sha256": "99bce62ba6874ce6a5e135431caa43d22572c6879f357d6cbbc2df97d0ca3f41",
-        "size_bytes": 1591992964,
-        "description": "Single test dataset in SigMF format"
-      }
-    }
-  },
   "modforge": {
     "latest": "1.0.0",
     "versions": {
@@ -21,7 +8,9 @@
         "root_dir": "modforge/1.0.0",
         "sha256": "c062ff7f9f3567b04bb5c72d4dc4effe95b5ce038075754b02ba195cc71779a9",
         "size_bytes": 10383371460,
-        "description": "Modulation dataset stored in HDF5 format."
+        "description": "Modulation dataset stored in HDF5 format.",
+        "license": "CC-BY-4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/"
       }
     }
   }
