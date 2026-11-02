@@ -14,7 +14,34 @@ This project is organized into three main components:
 
 CorteXforge follows semantic versioning.
 
-Version 1.0 defines the first stable release of the documented command-line interface and experiment workflow. Internal Python APIs may continue to evolve within the 1.x series unless explicitly documented as public.
+Version 1.0.0 defines the first stable release of the documented command-line interface and experiment workflow. Internal Python APIs may continue to evolve within the 1.x series unless explicitly documented as public.
+
+## Licensing
+
+CorteXforge and the datasets distributed via this framework are governed by separate licences.
+
+| Component | Type | Version |License |
+|---|---|---|---|
+| CorteXforge | Software framework | v1.0.0 | BSD-3-Clause |
+| ModForge | RF dataset | 1.0.0 | CC BY 4.0 |
+
+See [LICENSE](LICENSE) and [LICENSE-DATA.md](LICENSE-DATA.md) for the applicable licensing terms.
+
+## Citation
+
+If you use CorteXforge or its datasets in your
+research, please cite:
+
+> A. Joly, L. S. Cardoso, and J.-M. Gorce, "CorteXforge: Scenario-Based RF Dataset Generation on Real Testbeds," arXiv:2610.26999, 2026.
+
+[Read the paper](https://arxiv.org/abs/2610.26999)
+
+For citation metadata and automatically generated
+BibTeX, see [CITATION.cff](CITATION.cff).
+
+When publishing results using a dataset, please
+also report its name and version.
+
 
 ## Architecture
 

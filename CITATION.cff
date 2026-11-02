@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use CorteXforge in your research, please cite the software using the metadata below."
+message: "If you use CorteXforge or its datasets in your research, please cite the associated paper."
 
 title: "CorteXforge"
 type: software
@@ -25,3 +25,17 @@ keywords:
   - SigMF
 
 license: "BSD-3-Clause"
+
+preferred-citation:
+  type: generic
+  title: "CorteXforge: Scenario-Based RF Dataset Generation on Real Testbeds"
+  authors:
+    - family-names: "Joly"
+      given-names: "Andréa"
+    - family-names: "Sampaio Cardoso"
+      given-names: "Leonardo"
+    - family-names: "Gorce"
+      given-names: "Jean-Marie"
+  year: 2026
+  status: preprint
+  url: "https://arxiv.org/abs/2610.26999"
